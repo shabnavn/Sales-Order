@@ -119,6 +119,7 @@ namespace Sales_Order.Controllers
                     lstOrders.SlotVal = dr["slot"].ToString();
                     lstOrders.slotID = dr["slt_ID"].ToString();
                     lst.Add(lstOrders);
+
                 }
                 return Json(lst, JsonRequestBehavior.AllowGet);
             }
