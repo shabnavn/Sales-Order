@@ -1,0 +1,374 @@
+﻿
+<div class="modal fade" tabindex="-1" id="modal_edit_popup" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content position-absolute">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Item</h5>
+                <small class="col-lg-9" style="text-align-last:end">Click anywhere to drag</small>
+                <!--begin::Close-->
+                <div class="btn btn-icon btn-sm btn-active-light-primary ms-2" data-bs-dismiss="modal" aria-label="Close">
+                    <span class="svg-icon svg-icon-2x"></span>
+                </div>
+                <!--end::Close-->
+            </div>
+
+            <div class="modal-body">
+                <table class="table mb-0">
+
+                    <tbody>
+                        <tr>
+                            <th style="text-align: center; vertical-align: middle;" class="col-lg-1">
+                                Item
+                            </th>
+                            <th class="pb-0 col-lg-3">
+                                <span id="grdItemName"> </span>
+                                <span id="grdItmID" hidden></span>
+                                <span id="grdSeqNo" hidden></span>
+                            </th>
+                        </tr>
+                        <tr>
+                            <th style="text-align: center; vertical-align: middle;" class="col-lg-1">
+                                H.UOM
+                            </th>
+                            <th class="pb-0 col-lg-1" style="text-align: end;">
+
+                                @(Html.Kendo().MultiColumnComboBox()
+                      .Name("editHUOM")
+                      .Placeholder("Select H.UOM")
+                      .DataTextField("uomName")
+                      .DataValueField("uomID")
+                      .Filter("contains")
+                       .FilterFields(new string[] { "uomName", "UPC" })
+                       .Columns(columns =>
+                       {
+                           columns.Add().Field("uomName").Title("UOM");
+                           columns.Add().Field("UPC").Title("UPC");
+                       })
+                       .HtmlAttributes(new { @class = "form-control", @style= "width:100%", @tabindex = "6" })
+                      .DataSource(source => {
+                          source.Read(read =>
+                          {
+                              read.Action("getUOM", "Order").Data("grdedit_h_uom_filter");
+                          }).ServerFiltering(true);
+                      })
+                       .Enable(true)
+                      .AutoBind(true)
+                       .Events(e =>
+                       {
+                           e.Change("edit_on_H_UOM_Change");
+                       })
+                )
+                                <span id="edit_HuomError" style="color:red; display:none"> Please choose H.UOM </span>
+                            </th>
+                        </tr>
+                        <tr>
+                            <th style="text-align: center; vertical-align: middle;" class="col-lg-1">
+                                Price
+                            </th>
+                            <th class="pb-0" style=" vertical-align: middle;">
+                                <span style="color:green" id="edit_H_Offer_Price">0.00</span>  <del>
+                                    <span style="color:red" id="edit_H_Std_Price"></span>
+                                </del>
+                            </th>
+                        </tr>
+
+                        <tr>
+                            <th style="text-align: center; vertical-align: middle;" class="col-lg-1">
+                                H.Qty
+                            </th>
+                            <th class="pb-0 col-lg-1" style="text-align: end;">
+                                @(Html.Kendo().NumericTextBox<int>()
+            .Name("editHQty")
+            .Format("#")
+            .Placeholder("Enter Qty")
+            .Min(0)
+            .Max(2000)
+            .Events(e => e
+             .Change("Edit_CalcTotPrice")
+             .Spin("Edit_CalcTotPrice") )
+            .HtmlAttributes(new {  title = "numeric", @tabindex = "7", @class = "form-control", @style = "width:100%",  @AutoComplete = "off" })
+      )
+                                <span id="edit_HQtyError" style="color:red; display:none"> Please enter H.Qty </span>
+                            </th>
+
+                        </tr>
+                        <tr>
+                            <th style="text-align: center; vertical-align: middle;" class="col-lg-1">
+                                L.UOM
+                            </th>
+
+                            <th class="pb-0 col-lg-1" style="text-align: end;">
+                                @(Html.Kendo().MultiColumnComboBox()
+                      .Name("editLUOM")
+                      .Placeholder("Select L.UOM")
+                      .DataTextField("uomName")
+                      .DataValueField("uomID")
+                      .Filter("contains")
+                       .FilterFields(new string[] { "uomName", "UPC" })
+                       .Columns(columns =>
+                       {
+                           columns.Add().Field("uomName").Title("UOM");
+                           columns.Add().Field("UPC").Title("UPC");
+                       })
+                       .HtmlAttributes(new { @class = "form-control", @style = "width:100%", @tabindex = "8" })
+                      .DataSource(source => {
+                          source.Read(read =>
+                          {
+                              read.Action("getLUOM", "Order").Data("grdedit_l_uom_filter");
+                          }).ServerFiltering(true);
+                      })
+                       .Enable(true)
+                      .AutoBind(false)
+                      .CascadeFrom("editHUOM")
+                       .Events(e =>
+                       {
+                           e.Change("edit_on_L_UOM_Change");
+                       })
+                )
+                            </th>
+                        </tr>
+
+                        <tr>
+
+                            <th style="text-align: center; vertical-align: middle;" class="col-lg-1">
+                                Price
+                            </th>
+
+                            <th class="pb-0 col-lg-1" style=" vertical-align: middle;">
+                                <span style="color:green" id="edit_L_Offer_Price">0.00</span>
+                                <del><span style="color:red" id="edit_L_Std_Price"></span> </del>
+                            </th>
+                        </tr>
+                        <tr>
+                            <th style="text-align: center; vertical-align: middle;" class="col-lg-1">
+                                L.Qty
+                            </th>
+                            <th class="pb-0 col-lg-1" style="text-align: end;">
+
+                                @(Html.Kendo().NumericTextBox<int>()
+                                         .Name("editLQty")
+                                         .Format("#")
+                                         .Placeholder("Enter Qty")
+                                         .Min(0)
+                                         .Max(2000)
+                                           .Events(e => e
+             .Change("Edit_CalcTotPrice")
+             .Spin("Edit_CalcTotPrice"))
+                                          .HtmlAttributes(new {  title = "numeric" ,  @tabindex = "9", @class = "form-control", @style = "width:100%", @AutoComplete = "off" })
+                                        )
+                            </th>
+                        </tr>
+
+                        <tr>
+
+
+
+                            <th style="text-align: center; vertical-align: middle;" class="col-lg-1">
+                                Total
+                                <span  id="edit_TotalPcs"></span>
+                            </th>
+                            <th class="pb-0" style=" vertical-align:middle; "> <span style="color:green" id="edit_TotalPrice"></span></th>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+            <span id="edit_HTotalPcsError" style="color:red; display:none"> The total qty is should be less than the ordered qty </span>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                <button type="button" onclick="UpdateItem()" class="btn btn-primary">Save changes</button>
+                <img id="updateLoader" style="display: none;" class="text-center" src="../Content/media/icons/loader.gif" height="38" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+
+    function UpdateItem() {
+        $('#updateLoader').show('slow');
+
+        cusID = @Session["cusID"].ToString();
+        itmID = $("#grdItmID").text();
+        HuomID = $("#editHUOM").val();
+        LuomID = $("#editLUOM").val();
+        SeqNo = $("#grdSeqNo").text();
+
+        TotalPcs = $("#edit_TotalPcs").text();
+
+
+        var h_Qty = $("#editHQty").data("kendoNumericTextBox").value();
+        var l_Qty = $("#editLQty").data("kendoNumericTextBox").value();
+
+
+
+         $('#edit_HQtyError').hide('slow');
+        $('#edit_HuomError').hide('slow');
+        $('#edit_HTotalPcsError').hide('slow');
+
+
+
+         $.ajax({
+                type: "GET",
+                url: '@Url.Action("getItemTotalPcs", "Confirm")',
+                contentType: "application/json; charset=utf-8",
+                data: {
+                    "itmID": itmID,
+                    "Huom": HuomID,
+                    "Hqty": h_Qty,
+                    "Luom": LuomID,
+                    "LQty": l_Qty
+                },
+             dataType: "json",
+             success: function (data) {
+                 if (data.totalPcs <= TotalPcs) {
+
+                                                              $.ajax({
+                                                    type: "GET",
+                                                    url: '@Url.Action("AddItem", "Confirm")',
+                                                    contentType: "application/json; charset=utf-8",
+                                                    data: {
+                                                        "itmID": itmID,
+                                                        "cusID": cusID,
+                                                        "H_uom_ID": HuomID,
+                                                        "H_Qty": h_Qty,
+                                                        "L_uom_ID": LuomID,
+                                                        "L_Qty": l_Qty,
+                                                        "SeqNo": SeqNo
+                                                    },
+                                                 dataType: "json",
+                                                 success: function (data) {
+                                                     if (data.res == "0") {
+
+                                                         $('#listPartial').load('/Confirm/ShowList');
+
+                                                         ShowSummary();
+                                                         $('#updateLoader').hide('hide');
+                                                         $('#modal_edit_popup').modal('hide');
+
+                                                     } else {
+                                                         toastr.error(data.err);
+                                                         $('#updateLoader').hide('hide');
+                                                     }
+                                                 }
+                                                   });
+                 } else {
+                     $('#updateLoader').hide('slow');
+                     $('#edit_HTotalPcsError').show('slow');
+                 }
+             }
+               });
+
+
+
+
+
+    }
+
+
+    function edit_on_H_UOM_Change() {
+        cusID =  @Session["cusID"].ToString();
+        itmID = $('#grdItmID').text()
+        uomID = $("#editHUOM").val();
+        if (uomID != "") {
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("getItmPrice", "Order")',
+                contentType: "application/json; charset=utf-8",
+                data: {
+                    "cusID": cusID,
+                    "itmID": itmID,
+                    "uomID": uomID
+                },
+                dataType: "json",
+                success: function (data) {
+
+                    document.getElementById("edit_H_Offer_Price").innerHTML = data[0].OfferPrice;
+                    document.getElementById("edit_H_Std_Price").innerHTML = data[0].StandardPrice;
+                    document.getElementById("edit_L_Offer_Price").innerHTML = "0.00";
+                    document.getElementById("edit_L_Std_Price").innerHTML = "";
+                    $("#editLQty").data("kendoNumericTextBox").value("0");
+                }
+            });
+        } else {
+            document.getElementById("edit_H_Offer_Price").innerHTML = "0.00";
+            document.getElementById("edit_H_Std_Price").innerHTML = "";
+            document.getElementById("edit_L_Offer_Price").innerHTML = "0.00";
+            document.getElementById("edit_L_Std_Price").innerHTML = "";
+            $("#editLQty").data("kendoNumericTextBox").value("");
+            $("#editHQty").data("kendoNumericTextBox").value("");
+        }
+
+        Edit_CalcTotPrice();
+
+    }
+
+    function edit_on_L_UOM_Change() {
+          cusID =  @Session["cusID"].ToString();
+        itmID = $('#grdItmID').text()
+        uomID = $("#editLUOM").val();
+        if (uomID != "") {
+              $.ajax({
+                type: "GET",
+                url: '@Url.Action("getItmPrice", "Order")',
+                contentType: "application/json; charset=utf-8",
+                data: {
+                    "cusID": cusID,
+                    "itmID": itmID,
+                    "uomID": uomID
+                },
+                dataType: "json",
+              success: function (data) {
+                  document.getElementById("edit_L_Offer_Price").innerHTML = data[0].OfferPrice;
+                  document.getElementById("edit_L_Std_Price").innerHTML = data[0].StandardPrice;
+                }
+            });
+        } else {
+            document.getElementById("edit_L_Offer_Price").innerHTML = "0.00";
+            document.getElementById("edit_L_Std_Price").innerHTML = "";
+            $("#editLQty").data("kendoNumericTextBox").value("");
+        }
+        Edit_CalcTotPrice();
+    }
+
+      function Edit_CalcTotPrice() {
+          var H_price = document.getElementById("edit_H_Offer_Price").innerHTML;
+          var L_price = document.getElementById("edit_L_Offer_Price").innerHTML;
+          var h_Qty = $("#editHQty").data("kendoNumericTextBox").value();
+          var l_Qty = $("#editLQty").data("kendoNumericTextBox").value();
+         $.ajax({
+                type: "GET",
+                url: '@Url.Action("CalcItemTotal", "Order")',
+                contentType: "application/json; charset=utf-8",
+                data: {
+                    "H_price": H_price,
+                    "L_price": L_price,
+                    "h_Qty": h_Qty,
+                    "l_Qty": l_Qty
+                },
+                dataType: "json",
+                success: function (data) {
+
+                    document.getElementById("edit_TotalPrice").innerHTML = data.total;
+                }
+            });
+    }
+
+    function grdedit_h_uom_filter() {
+        return {
+            itmID: $('#grdItmID').text() ,
+            uomName: $("#editHUOM").data("kendoMultiColumnComboBox").input.val()
+        };
+    }
+
+    function grdedit_l_uom_filter() {
+        return {
+            itmID: $('#grdItmID').text(),
+            H_uom_ID: $("#editHUOM").val()
+        };
+    }
+
+</script>

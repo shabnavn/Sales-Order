@@ -1,0 +1,1131 @@
+﻿@using Sales_Order.Models;
+@model UOM
+
+@{
+    ViewBag.Title = "NewOrder";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div class="d-flex flex-column flex-column-fluid">
+    <!--begin::Toolbar-->
+    <div id="kt_app_toolbar" class="app-toolbar py-3 py-lg-6">
+        <!--begin::Toolbar container-->
+        <div id="kt_app_toolbar_container" class="app-container container-fluid d-flex flex-stack">
+            <!--begin::Page title-->
+            <div class="page-title d-flex  flex-wrap me-3">
+                <!--begin::Title-->
+                <span style="padding-right:10px"> <img src="../Content/media/icons/left-arrow.svg" /> </span>
+                <h1 class="page-heading d-flex text-dark fw-bold fs-3 flex-column justify-content-center my-0">
+                    New Order
+                </h1>
+                <!--end::Title-->
+            </div>
+            <!--end::Page title-->
+            <!--begin::Actions-->
+            <div class="d-flex align-items-center gap-2 gap-lg-3">
+                <a href="#" class="btn btn-outline btn-sm  " style="outline:auto !important; display:none">Back</a>
+                <a href="#" class="btn btn-outline btn-sm fw-bold bg-body btn-color-gray-700 btn-active-color-primary">Cancel</a>
+                <a href="#" class="btn btn-sm fw-bold btn-primary" id="btnProceed" data-backdrop="static" data-keyboard="false" onclick="CreateOrder()">
+                    Proceed
+
+                </a>
+                <img id="loaderFG" style="display:none" class="text-center" src="../Content/media/icons/loader.gif" height="38" />
+                <!--begin::Secondary button-->
+                <!--end::Secondary button-->
+                <!--begin::Primary button-->
+                <!--end::Primary button-->
+            </div>
+            <!--end::Actions-->
+        </div>
+        <!--end::Toolbar container-->
+    </div>
+    <!--end::Toolbar-->
+    <!--begin::Content-->
+    <div id="kt_app_content" class="app-content flex-column-fluid">
+        <!--begin::Content container-->
+        <div id="kt_app_content_container" class="app-container container-fluid">
+            <!--begin::Row-->
+
+
+            <div class="row g-5 g-xl-10 mb-5 mb-xl-10">
+                <!--begin::Col-->
+                <div class="col-xl-6 card card-flush ">
+                    <!--begin::Chart Widget 35-->
+                    <div class="col-lg-12 row mb-3" style="display: -webkit-box;">
+                        <!--begin::Header-->
+
+                        <div class="col-lg-4">
+                            <div class="col-lg-12 pt-5">
+                                <!--begin::Title-->
+                                <span class="align-items-start flex-column">
+                                    Route
+                                </span>
+                            </div>
+                            <div class="col-lg-12">
+                                <!--begin::Nav-->
+                                @*<ul class="nav d-flex justify-content-between mb-3  mx-9">*@
+                                @(Html.Kendo().ComboBox()
+                      .Name("Route")
+                      .Placeholder("Select Route")
+                      .DataTextField("rotName")
+                      .DataValueField("rotID")
+                      .HtmlAttributes(new { style = "width:100%;" })
+                      .Filter(FilterType.Contains)
+                       .HtmlAttributes(new { style = "width: 100%", title = "datepicker", @tabindex="1" , @class = "form-control" })
+                      .DataSource(source => {
+                          source.Read(read =>
+                          {
+                              read.Action("GetRoute", "Order");
+                          });
+                      })
+                      .Events(e =>
+                      {
+                          e.Change("RouteChange");
+                      })
+                                    )
+                                <span id="cusError" style="color:red; display:none"> Please choose Route </span>
+
+                                @*</ul>*@
+                            </div>
+                        </div>
+
+
+                        <div class="col-lg-4">
+                            <div class="col-lg-12 pt-5">
+                                <!--begin::Title-->
+                                <span class="align-items-start flex-column">
+                                    Customer
+                                </span>
+                            </div>
+                            <div class="col-lg-12">
+                                <!--begin::Nav-->
+                                @*<ul class="nav d-flex justify-content-between mb-3  mx-9">*@
+                                @(Html.Kendo().ComboBox()
+                      .Name("Customers")
+                      .Placeholder("Select Customer")
+                      .DataTextField("cusName")
+                      .DataValueField("cusID")
+                      .HtmlAttributes(new { style = "width:100%;" })
+                      .Filter(FilterType.Contains)
+                       .HtmlAttributes(new { style = "width: 100%", title = "datepicker", @tabindex="2" , @class = "form-control" })
+                      .DataSource(source => {
+                          source.Read(read =>
+                          {
+                              read.Action("GetCustomer", "Order");
+                          });
+                      })
+                      .Events(e =>
+                      {
+                          e.Change("CusChange");
+                      })
+                                    )
+                                <span id="cusError" style="color:red; display:none"> Please choose customer </span>
+
+                                @*</ul>*@
+                            </div>
+                        </div>
+
+
+                        <div class="col-lg-4">
+                            <div class="col-lg-12 pt-5 mx-9">
+                                <!--begin::Title-->
+                                <span class=" align-items-start flex-column">
+                                    Order Type
+                                </span>
+                            </div>
+                            <div class="row col-lg-12 pt-2">
+                                <div class="col-6">
+                                    <label class="form-check-image active">
+                                        <div class="form-check form-check-custom form-check-solid">
+                                            <input class="form-check-input" type="radio" onclick="CusChange()" checked value="1" name="otype" />
+                                            <div class="form-check-label">
+                                                New Order
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                                <!--end::Col-->
+                                <!--begin::Col-->
+                                <div class="col-6">
+                                    <label class="form-check-image active">
+                                        <div class="form-check form-check-custom form-check-solid">
+                                            <input class="form-check-input" id="repeat" onclick="CusChange()" type="radio" value="2" name="otype" />
+                                            <div class="form-check-label">
+                                                Repeat Order
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!--end::Body-->
+                    </div>
+                    <!--end::Chart Widget 33-->
+
+
+
+                    <div class=" col-lg-12 row" style="display: -webkit-box;">
+                        <!--begin::Header-->
+
+                        <div class="col-lg-8 row">
+                            <div class="col-lg-6 row">
+                                <div class="col-lg-12">
+                                    <!--begin::Title-->
+                                    <span class="align-items-start flex-column">
+                                        Exp Delivery Date
+                                    </span>
+                                </div>
+                                <div class="col-lg-12">
+                                    <!--begin::Nav-->
+                                    <ul class="nav d-flex justify-content-between mb-3" style="width:100%">
+                                        @(Html.Kendo().DatePicker()
+          .Name("dspDate")
+          .Format("dd-MMM-yyyy")
+          .Value(DateTime.Now)
+          .Min(DateTime.Now)
+          .Max(DateTime.Now.AddDays(10))
+          .HtmlAttributes(new { style = "width: 100%", title = "datepicker"  , @tabindex = "3", @class ="form-control" })
+        )
+                                        <span id="dateError" style="color:red; display:none"> Please enter date </span>
+                                    </ul>
+                                </div>
+
+                            </div>
+                            <div class="col-lg-6 row">
+                                <div class="col-lg-12">
+                                    <!--begin::Title-->
+                                    <span class="align-items-start flex-column mx-9">
+                                        Prefferred Time Slot
+                                    </span>
+                                </div>
+                                <div class="col-lg-12">
+                                    <!--begin::Nav-->
+                                    <ul class="nav d-flex justify-content-between mb-3 mx-9" style="width:100%">
+                                        @(Html.Kendo().ComboBox()
+                      .Name("TimeSlot")
+                      .Placeholder("Select Time Slot")
+                      .DataTextField("SlotVal")
+                      .DataValueField("slotID")
+                      .Filter(FilterType.Contains)
+                       .HtmlAttributes(new { style = "width: 100%", @tabindex = "4", @class = "form-control" })
+                      .DataSource(source => {
+                          source.Read(read =>
+                          {
+                              read.Action("GetCusSlots", "Order").Data("Cusfilter");
+                          }).ServerFiltering(true);
+                      })
+
+                      .AutoBind(false)
+                      .CascadeFrom("Customers")
+                )
+                                        <span id="slotError" style="color:red; display:none"> Please choose slot</span>
+                                    </ul>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4">
+                            <div class="col-lg-12">
+                                <!--begin::Title-->
+                                <span class="align-items-start flex-column mx-9">
+                                    Repeat Previous Order
+                                </span>
+                            </div>
+                            <div class="col-lg-12">
+                                <!--begin::Nav-->
+                                <ul class="nav d-flex justify-content-between mb-3 mx-9" style="width:100%">
+                                    @(Html.Kendo().MultiColumnComboBox()
+                      .Name("PrevOrder")
+                      .Placeholder("Select Order No")
+                      .DataTextField("OrdNumber")
+                      .DataValueField("ordID")
+                      .Filter("contains")
+                       .FilterFields(new string[] { "OrdNumber", "CreatedOn"})
+                       .Columns(columns =>
+              {
+                  columns.Add().Field("OrdNumber").Title("Order Number").Width("100px");
+                  columns.Add().Field("CreatedOn").Title("Created On");
+              })
+                       .HtmlAttributes(new { style = "width: 100%",@class = "form-control", @tabindex = "11" })
+                      .DataSource(source => {
+                          source.Read(read =>
+                          {
+                              read.Action("getPrevOrders", "Order").Data("RepeatOrder");
+                          }).ServerFiltering(true);
+                      })
+                       .Enable(true)
+                      .AutoBind(false)
+                      .CascadeFrom("Customers")
+                        .Events(e =>
+                      {
+                          e.Change("onRepeatChange");
+                      })
+                )
+
+                                    <img id="loaderAll" style="display: none; position: fixed; " src="../Content/media/icons/loader.gif" height="38" />
+                                </ul>
+
+                            </div>
+                        </div>
+
+                        <!--end::Body-->
+                    </div>
+                </div>
+                <!--end::Col-->
+                <!--begin::Col-->
+                <div class="col-xl-3">
+                    <!--begin::Tables widget 14-->
+                    <div class="card card-flush h-md-100">
+
+
+                        <div class="table-responsive" style="padding-left:7%; padding-right:5%; padding-top:2%">
+                            <table class="table mb-0">
+                                <tbody>
+                                    <tr>
+                                        <td class="pb-0">Payment Type</td>
+                                        <th class="pb-0" style="text-align: end;">
+                                            <span id="PayType"></span>
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <td class="pb-0">Credit Days</td>
+                                        <th class="pb-0" style="text-align: end;">
+
+                                            <span id="CreditDays"></span>
+
+                                        </th>
+                                    </tr>
+
+                                    <tr>
+                                        <td class="pb-0">Total Credit Limit</td>
+                                        <th class="pb-0" style="text-align: end;">
+                                            <span id="TotCredLimit"></span>
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <td class="pb-0">Used Credit Limit</td>
+                                        <th class="pb-0" style="text-align: end;">
+                                            <span id="UsedCredLimit"></span>
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <td>Available Credit Limit</td>
+                                        <th style="text-align: end;"><span id="AvCreditLimit"></span></th>
+                                    </tr>
+
+                                </tbody>
+                            </table>
+                            @*<hr class="m-0" />*@
+                            <table class="table">
+                                <tbody>
+                                    <tr>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!--end::Tables widget 14-->
+                </div>
+
+                <div class="col-xl-3">
+                    <!--begin::Tables widget 14-->
+                    <div class="card card-flush h-md-100">
+
+
+                        <div class="table-responsive" style="padding-left:7%; padding-right:5%; padding-top:2%">
+                            <table class="table mb-0">
+                                <tbody>
+                                    <tr>
+                                        <td class="pb-0">Total</td>
+                                        <th class="pb-0" style="text-align: end;">
+                                            <span id="Summ_Total"></span>
+
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <td class="pb-0">Discount</td>
+                                        <th class="pb-0" style="text-align: end;">
+                                            <span id="Summ_Discount"></span>
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <td class="pb-0">Sub Total</td>
+                                        <th class="pb-0" style="text-align: end;">
+                                            <span id="Summ_SubTotal"></span>
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <td>VAT</td>
+                                        <th style="text-align: end;"><span id="Summ_VAT"></span></th>
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+                            <hr class="m-0" />
+                            <table class="table">
+                                <tbody>
+                                    <tr>
+                                        <td>Grand Total</td>
+                                        <th style="text-align: end;"><span id="Summ_GrandTotal"></span></th>
+                                    </tr>
+                                </tbody>
+
+                            </table>
+                        </div>
+
+                    </div>
+                    <!--end::Tables widget 14-->
+                </div>
+                <!--end::Col-->
+            </div>
+
+
+            <div class="row g-5 g-xl-10 mb-5 mb-xl-10" style="margin-right:0px" id="lstOrderAdding">
+                <div class="col-xl-12 card card-flush mt-2">
+                    <!--begin::Chart Widget 35-->
+                    <div class="col-lg-12 row mb-3" style="display: -webkit-box;">
+
+
+
+                        <table class="table mb-0">
+                            <thead>
+                                <tr>
+                                    <th style="text-align: center; vertical-align: middle;">
+                                        Item
+                                    </th>
+                                    <th style="text-align: center; vertical-align: middle;">
+                                        H.UOM
+                                    </th>
+                                    <th style="text-align: center; vertical-align: middle;">
+                                        Price
+                                    </th>
+                                    <th style="text-align: center; vertical-align: middle;">
+                                        H.Qty
+                                    </th>
+                                    <th style="text-align: center; vertical-align: middle;">
+                                        L.UOM
+                                    </th>
+                                    <th style="text-align: center; vertical-align: middle;">
+                                        Price
+                                    </th>
+                                    <th style="text-align: center; vertical-align: middle;">
+                                        L.Qty
+                                    </th>
+                                    <th style="text-align: center; vertical-align: middle;">
+                                        Total
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th class="pb-0 col-lg-3">
+                                        @(Html.Kendo().MultiColumnComboBox()
+                      .Name("Items")
+                      .Placeholder("Select Item")
+                      .DataTextField("itmName")
+                      .DataValueField("itmID")
+                      .Filter("contains")
+                       .FilterFields(new string[] { "itmCode", "itmName" })
+                       .Columns(columns =>
+                       {
+                           columns.Add().Field("itmCode").Title("Code");
+                           columns.Add().Field("itmName").Title("Name");
+                       })
+                       .HtmlAttributes(new { style = "width: 100%",@class = "form-control", @tabindex = "5" })
+                      .DataSource(source => {
+                          source.Read(read =>
+                          {
+                              read.Action("GetItems", "Order").Data("CusItems");
+                          }).ServerFiltering(true);
+                      })
+                       .Enable(true)
+                      .AutoBind(false)
+                      .CascadeFrom("Customers")
+                )
+                                        <span id="itmError" style="color:red; display:none"> Please choose item </span>
+
+                                    </th>
+
+
+                                    <th class="pb-0 col-lg-1" style="text-align: end;">
+
+                                        @(Html.Kendo().MultiColumnComboBox()
+                      .Name("HUOM")
+                      .Placeholder("Select H.UOM")
+                      .DataTextField("uomName")
+                      .DataValueField("uomID")
+                      .Filter("contains")
+                       .FilterFields(new string[] { "uomName", "UPC" })
+                       .Columns(columns =>
+                       {
+                           columns.Add().Field("uomName").Title("UOM");
+                           columns.Add().Field("UPC").Title("UPC");
+                       })
+                       .HtmlAttributes(new { @class = "form-control", @tabindex = "6" })
+                      .DataSource(source => {
+                          source.Read(read =>
+                          {
+                              read.Action("getUOM", "Order").Data("h_UOMFilter");
+                          }).ServerFiltering(true);
+                      })
+                       .Enable(true)
+                      .AutoBind(false)
+                      .CascadeFrom("Items")
+                      .Events(e =>
+            {
+                e.Change("on_HUOM_Change");
+            })
+                )
+                                        <span id="HuomError" style="color:red; display:none"> Please choose H.UOM </span>
+                                    </th>
+                                    <th class="pb-0" style="text-align: center; vertical-align: middle;">
+                                        <span style="color:green" id="H_Offer_Price">0.00</span>  <del>
+                                            <span style="color:red" id="H_Std_Price"></span>
+                                        </del>
+                                    </th>
+                                    <th class="pb-0 col-lg-1" style="text-align: end;">
+
+                                        @(Html.Kendo().NumericTextBox<int>()
+            .Name("HQty")
+            .Format("#")
+            .Placeholder("Enter Qty")
+            .Min(0)
+            .Max(2000)
+            .Events(e => e
+             .Change("CalcTotPrice")
+             .Spin("CalcTotPrice") )
+            .HtmlAttributes(new {  title = "numeric", @tabindex = "7", @class = "form-control", @AutoComplete = "off" })
+      )
+                                        <span id="HQtyError" style="color:red; display:none"> Please enter H.Qty </span>
+                                    </th>
+
+                                    <th class="pb-0 col-lg-1" style="text-align: end;">
+                                        @(Html.Kendo().MultiColumnComboBox()
+                      .Name("LUOM")
+                      .Placeholder("Select L.UOM")
+                      .DataTextField("uomName")
+                      .DataValueField("uomID")
+                      .Filter("contains")
+                       .FilterFields(new string[] { "uomName", "UPC" })
+                       .Columns(columns =>
+                       {
+                           columns.Add().Field("uomName").Title("UOM");
+                           columns.Add().Field("UPC").Title("UPC");
+                       })
+                       .HtmlAttributes(new { @class = "form-control", @tabindex = "8" })
+                      .DataSource(source => {
+                          source.Read(read =>
+                          {
+                              read.Action("getLUOM", "Order").Data("l_UOMFilter");
+                          }).ServerFiltering(true);
+                      })
+                       .Enable(true)
+                      .AutoBind(false)
+                      .CascadeFrom("HUOM")
+                      .Events(e =>
+                      {
+                          e.Change("on_L_UOM_Change");
+                      })
+                )
+                                    </th>
+                                    <th class="pb-0 col-lg-1" style="text-align: center; vertical-align: middle;">
+                                        <span style="color:green" id="L_Offer_Price">0.00</span>
+                                        <del><span style="color:red" id="L_Std_Price"></span> </del>
+                                    </th>
+                                    <th class="pb-0 col-lg-1" style="text-align: end;">
+
+                                        @(Html.Kendo().NumericTextBox<int>()
+                                         .Name("LQty")
+                                         .Format("#")
+                                         .Placeholder("Enter Qty")
+                                         .Min(0)
+                                         .Max(2000)
+                                           .Events(e => e
+             .Change("CalcTotPrice")
+             .Spin("CalcTotPrice"))
+                                          .HtmlAttributes(new {  title = "numeric" ,  @tabindex = "9", @class = "form-control", @AutoComplete = "off" })
+                                        )
+
+                                    </th>
+                                    <th class="pb-0" style="text-align: center; vertical-align:middle; "> <span style="color:green" id="TotalPrice">0.00</span></th>
+                                    <th class="pb-0 col-lg-1" style="text-align: end;">
+                                        <a href="#" onclick="AddItem()" class=" btn-outline-default " tabindex="10">Add Item</a>
+                                        <img id="loaderAdd" style="display: none;" class="text-center" src="../Content/media/icons/loader.gif" height="38" />
+                                    </th>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-5 g-xl-10 mb-5 mb-xl-10" style="margin-right:0px" id="lstOrderListing">
+                <div class="col-xl-12 card card-flush mt-2">
+                    <div id="listPartial" class="col-lg-12 mt-5 mb-5">
+                        @{
+                            Html.RenderPartial("ListOrder");
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-5 g-xl-10 mb-5 mb-xl-10" style="margin-right:0px; display:none" id="fg_Actions">
+
+                <div class="col-xl-12 card card-flush mt-2">
+                    <div class="d-flex align-items-center gap-2 gap-lg-3 mt-5" style="align-self:flex-end; ">
+                        <a href="#" onclick="Show_fg_back_popup()" class="btn btn-outline btn-sm  " style="outline:auto !important; ">Back</a>
+                        <a href="#" class="btn btn-sm fw-bold btn-primary" id="btnNext" data-backdrop="static" data-keyboard="false" onclick="NextFreeGood()">
+                            Next
+                        </a>
+                    </div>
+                    <div id="lstFreeGood" class="col-lg-12 mt-5 mb-5">
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <!--end::Content container-->
+    </div>
+    <!--end::Content-->
+</div>
+@{
+    Html.RenderPartial("ProceedBack");
+    Html.RenderPartial("ProceedOrder");
+    Html.RenderPartial("SuccessOrder");
+}
+
+<script>
+
+    function onRepeatChange() {
+        ordID = $("#PrevOrder").val();
+        cusID = $("#Customers").val();
+
+           $.ajax({
+                type: "GET",
+                url: '@Url.Action("updateRepeateOrder", "Order")',
+                contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    data: {
+                        "ordID": ordID,
+                        "cusID": cusID
+                    },
+              success: function (data) {
+                  if (data.res == "0") {
+
+                      $('#listPartial').load('/Order/ShowList');
+
+                      $("#Items").data("kendoMultiColumnComboBox").input.val("");
+                      $("#LUOM").data("kendoMultiColumnComboBox").input.val("");
+                      $("#HUOM").data("kendoMultiColumnComboBox").input.val("");
+                      $("#HQty").data("kendoNumericTextBox").value("")
+                      $("#LQty").data("kendoNumericTextBox").value("");
+
+                      $("#Items").val("");
+                      $("#HUOM").val("");
+                      $("#LUOM").val("");
+
+                      var ddlItems = $("#Items").data("kendoMultiColumnComboBox");
+                      ddlItems.dataSource.read();
+                      ddlItems.focus();
+
+                      ShowSummary();
+
+                  } else {
+                      toastr.error('There is already items in the list, please remove them and try again');
+                  }
+                }
+            });
+    }
+
+
+    function NextFreeGood() {
+
+
+        var values = new Array();
+        var AllID = document.getElementById("itmIds").innerHTML;
+        const listArray = AllID.split('-');
+        var totQty = 0;
+        for (let i = 0; i < listArray.length; i++) {
+            var id = listArray[i].toString();
+            id = id.replace(" ", "");
+            if (id != "") {
+                var qty = $("#fg_Qty_" + id).val();
+
+
+                if (parseInt(qty) > 0) {
+                    totQty = totQty + parseInt(qty);
+
+                    values.push({
+                        itmID: id,
+                        Qty: parseInt(qty)
+                    });
+                }
+            }
+        }
+
+
+
+        var elgQty = document.getElementById("elg_Qty").innerHTML;
+
+        if (totQty == elgQty) {
+
+             $.ajax({
+                type: "POST",
+                url: '@Url.Action("FindNextPromo", "Order")',
+                contentType: "application/json; charset=utf-8",
+                 dataType: "json",
+                 data: JSON.stringify({ values }),
+                 success: function (data) {
+                     if (data.nextEnable == "0") {
+                         $("#btnNext").text('Proceed');
+                     } else {
+                         $("#btnNext").text('Next');
+                     }
+
+                  if (data.mode == "P") {
+                      $('#lstFreeGood').load('/Order/ShowFreeGood', { csID: cusID });
+                  } else {
+
+                      $('#modal_ord_proceed_popup').modal('show');
+                  }
+                }
+            });
+
+        } else {
+            alert('The eligible qty (' + elgQty + ') and entered qty (' + totQty + ')should be same');
+        }
+
+    }
+
+    function Show_fg_back_popup() {
+        $('#modal_fg_back_popup').modal('show');
+    }
+
+    function Handle_fg_Back() {
+        $('#lstOrderAdding').show('slow');
+        $('#lstOrderListing').show('slow');
+        $('#fg_Actions').hide('slow');
+        $('#btnNext').show();
+        $("#btnNext").text('Next');
+        $('#btnProceed').show();
+        $('#modal_fg_back_popup').modal('hide');
+    }
+
+    function CreateOrder() {
+        $('#loaderFG').show('slow');
+        $('#cusError').hide();
+        $('#dateError').hide();
+        $('#slotError').hide();
+
+        DelSlot = $("#TimeSlot").val();
+        expDelDate = $("#dspDate").val();
+        cusID = $("#Customers").val();
+
+
+
+
+        if (cusID == "") {
+            $('#cusError').show();
+        } else if (expDelDate == "") {
+
+            $('#dateError').show();
+        } else if (DelSlot == "") {
+            $('#slotError').show();
+        } else {
+
+                $.ajax({
+                type: "GET",
+                url: '@Url.Action("getItemCount", "Order")',
+                contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    data: {
+                        "cusID": cusID,
+                    },
+              success: function (data) {
+                  if (data.res == "1") {
+                      if (data.PrmCount == 0) {
+                          //IN PROCEEDORDER VIEW
+                          $('#modal_ord_proceed_popup').modal('show');
+                      } else {
+                          $('#btnProceed').hide();
+                          $('#lstOrderAdding').hide('slow');
+                          $('#lstOrderListing').hide('slow');
+                          $('#fg_Actions').show('slow');
+                          $('#lstFreeGood').load('/Order/ShowFreeGood', { csID: cusID });
+                      }
+                  } else {
+                      toastr.error('You must add atleast one item to place an order');
+                  }
+                }
+            });
+        }
+        $('#loaderFG').hide('slow');
+    }
+
+
+    function ShowSummary() {
+         $.ajax({
+                type: "GET",
+                url: '@Url.Action("getSummary", "Order")',
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+              success: function (data) {
+
+                  document.getElementById("Summ_Total").innerHTML = data.Total;
+                  document.getElementById("Summ_Discount").innerHTML = data.Discount;
+                  document.getElementById("Summ_SubTotal").innerHTML = data.SubTotal;
+                  document.getElementById("Summ_VAT").innerHTML = data.VAT;
+                  document.getElementById("Summ_GrandTotal").innerHTML = data.GrandTotal;
+                }
+            });
+    }
+
+    function CusChange() {
+        $('#loaderAll').show('slow');
+        setTimeout(function () {
+
+            var isChecked = $('#repeat').is(':checked');
+            var cmbBox = $("#PrevOrder").data('kendoMultiColumnComboBox');
+            if (!isChecked) {
+                cmbBox.enable(false);
+            } else {
+                cmbBox.enable(true);
+            }
+        }, 2000);
+
+
+
+        cusID = $("#Customers").val();
+        rotID = $("#Route").val();
+          $.ajax({
+                type: "GET",
+                url: '@Url.Action("getCusCrTerms", "Order")',
+                contentType: "application/json; charset=utf-8",
+                data: {
+                    "cusID": cusID,
+                    "rotID": rotID
+                },
+             dataType: "json",
+              success: function (data) {
+                  $('#PayType').text(data.cusType);
+                  $('#CreditDays').text(data.crDays);
+                  $('#TotCredLimit').text(data.TotalCr);
+                  $('#UsedCredLimit').text(data.UsedCr);
+                  $('#AvCreditLimit').text(data.AvlCr);
+             }
+          });
+
+        $('#listPartial').load('/Order/ShowList');
+        document.getElementById("Summ_Total").innerHTML = "";
+        document.getElementById("Summ_Discount").innerHTML = "";
+        document.getElementById("Summ_SubTotal").innerHTML = "";
+        document.getElementById("Summ_VAT").innerHTML = "";
+        document.getElementById("Summ_GrandTotal").innerHTML = "";
+
+
+
+        $('#loaderAll').hide('slow');
+
+    }
+
+    function AddItem() {
+        $('#loaderAdd').show('slow')
+        $('#cusError').hide();
+        $('#itmError').hide();
+        $('#HuomError').hide();
+        $('#HQtyError').hide();
+
+        cusID = $("#Customers").val();
+        rotID = $("#Route").val();
+        itmID = $("#Items").val();
+        HuomID = $("#HUOM").val();
+        LuomID = $("#LUOM").val();
+
+        var h_Qty = $("#HQty").data("kendoNumericTextBox").value();
+        var l_Qty = $("#LQty").data("kendoNumericTextBox").value();
+
+        if (cusID == "") {
+            $('#cusError').show('slow')
+            $('#loaderAdd').hide('slow')
+        }
+        else if (itmID == "") {
+            $('#itmError').show('slow')
+            $('#loaderAdd').hide('slow')
+        } else if (HuomID == "") {
+            $('#HuomError').show('slow')
+            $('#loaderAdd').hide('slow')
+
+        } else if (h_Qty == "") {
+            $('#HQtyError').show('slow')
+            $('#loaderAdd').hide('slow')
+        }
+        else {
+            $('#cusError').hide('slow');
+            $('#itmError').hide('slow');
+            $('#HuomError').hide('slow');
+            $('#HQtyError').hide('slow');
+               $.ajax({
+                type: "GET",
+                url: '@Url.Action("AddItem", "Order")',
+                contentType: "application/json; charset=utf-8",
+                data: {
+                    "itmID": itmID,
+                    "cusID": cusID,
+                    "rotID": rotID,
+                    "H_uom_ID": HuomID,
+                    "H_Qty": h_Qty,
+                    "L_uom_ID": LuomID,
+                    "L_Qty": l_Qty,
+                    
+                },
+             dataType: "json",
+             success: function (data) {
+                 if (data.res == "0") {
+
+                     $('#listPartial').load('/Order/ShowList');
+
+                     $("#Items").data("kendoMultiColumnComboBox").input.val("");
+                     $("#LUOM").data("kendoMultiColumnComboBox").input.val("");
+                     $("#HUOM").data("kendoMultiColumnComboBox").input.val("");
+                     $("#HQty").data("kendoNumericTextBox").value("")
+                     $("#LQty").data("kendoNumericTextBox").value("");
+
+                     $("#Items").val("");
+                     $("#HUOM").val("");
+                     $("#LUOM").val("");
+
+                     var ddlItems = $("#Items").data("kendoMultiColumnComboBox");
+                     ddlItems.dataSource.read();
+                     ddlItems.focus();
+
+                     ShowSummary();
+
+
+
+                     $('#loaderAdd').hide('hide');
+
+
+
+
+                 } else {
+                     toastr.error(data.err);
+                     $('#loaderAdd').hide('hide');
+                 }
+             }
+               });
+        }
+
+
+
+    }
+
+
+    function CalcTotPrice() {
+        var H_price = document.getElementById("H_Offer_Price").innerHTML;
+        var L_price = document.getElementById("L_Offer_Price").innerHTML;
+        var h_Qty = $("#HQty").data("kendoNumericTextBox").value();
+        var l_Qty = $("#LQty").data("kendoNumericTextBox").value();
+         $.ajax({
+                type: "GET",
+                url: '@Url.Action("CalcItemTotal", "Order")',
+                contentType: "application/json; charset=utf-8",
+                data: {
+                    "H_price": H_price,
+                    "L_price": L_price,
+                    "h_Qty": h_Qty,
+                    "l_Qty": l_Qty
+                },
+                dataType: "json",
+                success: function (data) {
+
+                    document.getElementById("TotalPrice").innerHTML = data.total;
+                }
+            });
+    }
+
+    function on_HUOM_Change() {
+        cusID =  $("#Customers").val();
+        itmID =  $("#Items").val();
+        uomID = $("#HUOM").val();
+        if (uomID != "") {
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("getItmPrice", "Order")',
+                contentType: "application/json; charset=utf-8",
+                data: {
+                    "cusID": cusID,
+                    "itmID": itmID,
+                    "uomID": uomID
+                },
+                dataType: "json",
+                success: function (data) {
+
+                    document.getElementById("H_Offer_Price").innerHTML = data[0].OfferPrice;
+                    document.getElementById("H_Std_Price").innerHTML = data[0].StandardPrice;
+                }
+            });
+        } else {
+            document.getElementById("H_Offer_Price").innerHTML = "0.00";
+            document.getElementById("H_Std_Price").innerHTML = "";
+            document.getElementById("L_Offer_Price").innerHTML = "0.00";
+            document.getElementById("L_Std_Price").innerHTML = "";
+            $("#LQty").data("kendoNumericTextBox").value("");
+            $("#HQty").data("kendoNumericTextBox").value("");
+        }
+
+        CalcTotPrice();
+    }
+
+
+    function on_L_UOM_Change() {
+        cusID =  $("#Customers").val();
+        itmID =  $("#Items").val();
+        uomID = $("#LUOM").val();
+        if (uomID != "") {
+              $.ajax({
+                type: "GET",
+                url: '@Url.Action("getItmPrice", "Order")',
+                contentType: "application/json; charset=utf-8",
+                data: {
+                    "cusID": cusID,
+                    "itmID": itmID,
+                    "uomID": uomID
+                },
+                dataType: "json",
+              success: function (data) {
+
+                  document.getElementById("L_Offer_Price").innerHTML = data[0].OfferPrice;
+                  document.getElementById("L_Std_Price").innerHTML = data[0].StandardPrice;
+                }
+            });
+        } else {
+            document.getElementById("L_Offer_Price").innerHTML = "0.00";
+            document.getElementById("L_Std_Price").innerHTML = "";
+            $("#LQty").data("kendoNumericTextBox").value("");
+        }
+        CalcTotPrice();
+
+    }
+
+
+
+    function h_UOMFilter() {
+        return {
+            itmID: $("#Items").val(),
+            uomName: $("#HUOM").data("kendoMultiColumnComboBox").input.val()
+        };
+    }
+
+    function l_UOMFilter() {
+        return {
+            itmID: $("#Items").val(),
+            H_uom_ID: $("#HUOM").val(),
+            uomName: $("#LUOM").data("kendoMultiColumnComboBox").input.val()
+        };
+    }
+
+    function error_handler(e) {
+        if (e.errors) {
+            var message = "Errors:\n";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message += this + "\n";
+                    });
+                }
+            });
+            alert(message);
+        }
+    }
+
+    function returnFalse() {
+        return false;
+    }
+
+
+    $(document).ready(function () {
+        var cmbBox = $("#Route").data('kendoComboBox');
+        cmbBox.focus();
+
+    });
+
+    function Cusfilter() {
+        return {
+            cusID: $("#Customers").val(),
+            slot: $("#TimeSlot").data("kendoComboBox").input.val()
+        };
+    }
+
+
+
+    function RepeatOrder() {
+        return {
+            cusID: $("#Customers").val(),
+            OrderID: $("#PrevOrder").data("kendoMultiColumnComboBox").input.val()
+        };
+    }
+
+    function CusItems() {
+        return {
+            cusID: $("#Customers").val(),
+            itemName: $("#Items").data("kendoMultiColumnComboBox").input.val()
+        };
+    }
+
+    function RouteChange() {
+        var routeId = $("#Route").data("kendoComboBox").value(); // Get selected Route ID
+
+        if (routeId) {
+            // Make an AJAX call to fetch customers based on selected route
+            $.ajax({
+                url: '/Order/GetCustomer', // Your action to get customers based on route
+                type: 'GET',
+                data: { routeId: routeId }, // Send selected routeId as parameter
+                success: function (data) {
+                    var customerComboBox = $("#Customers").data("kendoComboBox");
+
+                    // Clear the current customer dropdown items
+                    customerComboBox.dataSource.data([]);
+
+                    // Populate with new data
+                    customerComboBox.dataSource.data(data);
+
+                    
+                },
+                error: function (xhr, status, error) {
+                    console.log("Error: " + error);
+                }
+            });
+        } else {
+            // If no route is selected, clear the Customer dropdown
+            var customerComboBox = $("#Customers").data("kendoComboBox");
+            customerComboBox.dataSource.data([]);
+        }
+    }
+
+
+
+
+    toastr.options = {
+        "closeButton": false,
+        "debug": false,
+        "newestOnTop": true,
+        "progressBar": true,
+        "positionClass": "toast-bottom-right position-fixed top-0 end-0 p-3 z-index-3",
+        "preventDuplicates": true,
+        "onclick": null,
+        "showDuration": "300",
+        "hideDuration": "1000",
+        "timeOut": "5000",
+        "extendedTimeOut": "1000",
+        "showEasing": "swing",
+        "hideEasing": "linear",
+        "showMethod": "fadeIn",
+        "hideMethod": "fadeOut"
+    };
+
+</script>

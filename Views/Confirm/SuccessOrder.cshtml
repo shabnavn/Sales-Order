@@ -1,0 +1,108 @@
+﻿
+<div class="modal fade" id="modal_success_order" tabindex="-1" aria-hidden="true" data-backdrop="static" data-keyboard="false" role="dialog">
+    <!--begin::Modal dialog-->
+    <div class="modal-dialog modal-dialog-centered mw-650px">
+        <!--begin::Modal content-->
+        <div class="modal-content rounded">
+            <!--begin::Modal header-->
+            <div class="modal-header pb-0 border-0 justify-content-end">
+                <!--begin::Close-->
+                <div class="btn btn-sm btn-icon btn-active-color-primary" onclick="ClosePage()">
+                    <!--begin::Svg Icon | path: icons/duotune/arrows/arr061.svg-->
+                    <span class="svg-icon svg-icon-1">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect opacity="0.5" x="6" y="17.3137" width="16" height="2" rx="1" transform="rotate(-45 6 17.3137)" fill="currentColor" />
+                            <rect x="7.41422" y="6" width="16" height="2" rx="1" transform="rotate(45 7.41422 6)" fill="currentColor" />
+                        </svg>
+                    </span>
+                    <!--end::Svg Icon-->
+                </div>
+                <!--end::Close-->
+            </div>
+            <!--begin::Modal header-->
+            <!--begin::Modal body-->
+            <div class="modal-body scroll-y px-10 px-lg-15 pt-0 pb-15">
+                <!--begin:Form-->
+                <div style="text-align-last:center">
+                    <!--begin::Heading-->
+                    <!--end::Heading-->
+                    <!--begin::Input group-->
+                    <div class="d-flex flex-column mb-8 fv-row" style="align-items:center">
+                        <!--begin::Label-->
+
+                        <img src="../Content/media/icons/success_tick.png" />
+
+                    </div>
+                    <!--end::Input group-->
+                    <!--begin::Input group-->
+                    <!--end::Input group-->
+                    <!--begin::Input group-->
+                    <div class="d-flex flex-column mb-8">
+                        <div class="me-5" style="display:contents">
+                            <label class="fs-6 fw-semibold">The order has been updated successfully</label>
+                            <label class="fs-6 fw-semibold">Order ID : <span id="OrderID"></span> </label>
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-column mb-8">
+                        <div class="me-5">
+                            <label class="fs-6 fw-semibold" style="color:green">A confirmation email has been sent to the customer</label>
+                        </div>
+                    </div>
+
+
+                    <div class="d-flex flex-stack mb-8" style="justify-content:center">
+
+                        @using (Html.BeginForm("DownlaodPDF", "Confirm"))
+                        {
+            <label class="form-check form-switch form-check-custom form-check-solid">
+                <img src="../Content/media/icons/download_pdf.png" />
+                <button class="form-check-label fw-semibold text-muted">Download PDF</button>
+            </label> <!--end::Switch-->}
+
+                    </div>
+
+
+                    <div class="text-center">
+                        <button type="submit" onclick="ClosePage()" id="btnSuccess" class="btn btn-primary">
+                            <span class="indicator-label">Done</span>
+                        </button>
+                    </div>
+                    <!--end::Actions-->
+                </div>
+                <!--end:Form-->
+            </div>
+            <!--end::Modal body-->
+        </div>
+        <!--end::Modal content-->
+    </div>
+    <!--end::Modal dialog-->
+</div>
+
+<script>
+
+    function DownloadPDF() {
+          $.ajax({
+                type: "POST",
+                url: '@Url.Action("DownlaodPDF", "Confirm")',
+                contentType: "application/json; charset=utf-8",
+             dataType: "json",
+             success: function (data) {
+
+             }
+               });
+    }
+
+    function ClosePage() {
+
+        @{ 
+            string md = Session["mode"].ToString();
+        }
+        var mode = '@Session["mode"].ToString()';
+        var ID = @Session["UserID"].ToString();
+        //window.location.href = '@Url.Action("NewOrder", "Order", new { mode =  md, userID = Session["UserID"].ToString() })';
+        var url = "../Order/NewOrder?mode=" + mode + "&userID=" + ID;
+        window.location.href = url;
+
+    }
+</script>

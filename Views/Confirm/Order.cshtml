@@ -1,0 +1,460 @@
+﻿@using System.Data
+@using Sales_Order.Models
+
+@{
+    ViewBag.Title = "Confirm";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    DataModel dm = new DataModel();
+    string[] arr = { };
+
+    string OrderID = "", cusName = "", CreatedOn = "", ExpDate = "", Slot = "", cus_TotalCreditLimit = "", cus_UsedCreditLimit = "",
+        cus_AvailableCreditLimit = "", cus_CreditDays = "", cus_Type = "", Total = "", Discount = "", subTotal = "", VAT = "", grandTotal = "", remarks = "";
+    string server = Session["mode"].ToString();
+    string ID = Session["OrderID"].ToString();
+    DataSet dataSet = dm.loadListDS("SelOrderInfo", "sp_Web_ConfirmOrder", ID, arr, server);
+
+    try
+    {
+        DataTable dt1 = dataSet.Tables[0];
+        DataTable dt2 = dataSet.Tables[1];
+        DataTable dt3 = dataSet.Tables[2];
+
+        Session["cusID"] = dt1.Rows[0]["cus_ID"].ToString();
+        OrderID = dt1.Rows[0]["OrderID"].ToString();
+        Session["OrderNo"] = OrderID;
+        cusName = dt1.Rows[0]["cusName"].ToString();
+        CreatedOn = dt1.Rows[0]["CreatedOn"].ToString();
+        ExpDate = dt1.Rows[0]["ExpDate"].ToString();
+        Slot = dt1.Rows[0]["Slot"].ToString();
+        remarks = dt1.Rows[0]["remarks"].ToString();
+
+        cus_TotalCreditLimit = dt2.Rows[0]["cus_TotalCreditLimit"].ToString();
+        cus_UsedCreditLimit = dt2.Rows[0]["cus_UsedCreditLimit"].ToString();
+        cus_AvailableCreditLimit = dt2.Rows[0]["cus_AvailableCreditLimit"].ToString();
+        cus_CreditDays = dt2.Rows[0]["cus_CreditDays"].ToString();
+        cus_Type = dt2.Rows[0]["cus_Type"].ToString();
+
+        Total = dt3.Rows[0]["Total"].ToString();
+        Discount = dt3.Rows[0]["Discount"].ToString();
+        subTotal = dt3.Rows[0]["SubTotal"].ToString();
+        VAT = dt3.Rows[0]["VAT"].ToString();
+        grandTotal = dt3.Rows[0]["GrandTotal"].ToString();
+
+    }
+    catch
+    {
+
+    }
+
+
+}
+
+<div class="d-flex flex-column flex-column-fluid">
+
+    <div id="kt_app_toolbar" class="app-toolbar py-3 py-lg-6">
+        <!--begin::Toolbar container-->
+        <div id="kt_app_toolbar_container" class="app-container container-fluid d-flex flex-stack">
+            <!--begin::Page title-->
+            <div class="page-title d-flex  flex-wrap me-3">
+                <!--begin::Title-->
+                <span style="padding-right:10px"> <img src="../Content/media/icons/left-arrow.svg" /> </span>
+                <h1 class="page-heading d-flex text-dark fw-bold fs-3 flex-column justify-content-center my-0">
+                    New Order
+                </h1>
+                <!--end::Title-->
+            </div>
+            <!--end::Page title-->
+            <!--begin::Actions-->
+            <div class="d-flex align-items-center gap-2 gap-lg-3">
+                <a href="#" class="btn btn-outline btn-sm  " style="outline:auto !important; display:none">Back</a>
+                <a href="#" class="btn btn-outline btn-sm fw-bold bg-body btn-color-gray-700 btn-active-color-primary">Cancel</a>
+                <a href="#" class="btn btn-sm fw-bold btn-primary" id="btnProceed" data-backdrop="static" data-keyboard="false" onclick="ConfirmOrder()">
+                    Confirm
+                </a>
+                <img id="loaderFG" style="display:none" class="text-center" src="../Content/media/icons/loader.gif" height="38" />
+
+            </div>
+            <!--end::Actions-->
+        </div>
+        <!--end::Toolbar container-->
+    </div>
+    <div id="kt_app_content" class="app-content flex-column-fluid">
+        <!--begin::Content container-->
+        <div id="kt_app_content_container" class="app-container container-fluid">
+            <!--begin::Row-->
+            <div class="row g-5 g-xl-10 mb-5 mb-xl-10">
+                <!--begin::Col-->
+                <div class="col-xl-6 card card-flush " style="padding:25px">
+                    <!--begin::Chart Widget 35-->
+                    <div class="col-lg-12 row mb-3" style="display: -webkit-box;">
+                        <!--begin::Header-->
+                        <div class="col-lg-4">
+                            <div class="col-lg-12 pt-5 mx-9">
+                                <!--begin::Title-->
+                                <span class=" align-items-start flex-column">
+                                    Order ID
+                                </span>
+                            </div>
+                            <div class="col-lg-12 pt-2 mx-9">
+                                <!--begin::Title-->
+                                <strong class=" align-items-start flex-column">
+                                    @OrderID
+                                </strong>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="col-lg-12 pt-5  mx-9">
+                                <!--begin::Title-->
+                                <span class="align-items-start flex-column">
+                                    Customer
+                                </span>
+                            </div>
+                            <div class="col-lg-12 pt-2  mx-9">
+                                <!--begin::Title-->
+                                <strong class="align-items-start flex-column">
+                                    @cusName
+                                </strong>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="col-lg-12 pt-5  mx-9">
+                                <!--begin::Title-->
+                                <span class="align-items-start flex-column">
+                                    Remarks
+                                </span>
+                            </div>
+                            <div class="col-lg-12 pt-2  mx-9">
+                                <!--begin::Title-->
+                                <strong class="align-items-start flex-column">
+                                    @remarks
+                                </strong>
+                            </div>
+                        </div>
+
+
+                        <!--end::Body-->
+                    </div>
+                    <!--end::Chart Widget 33-->
+
+
+
+                    <div class=" col-lg-12 row" style="display: -webkit-box;">
+                        <!--begin::Header-->
+                        <div class="col-lg-4">
+                            <div class="col-lg-12">
+                                <!--begin::Title-->
+                                <span class="align-items-start flex-column mx-9">
+                                    Created On
+                                </span>
+                            </div>
+                            <div class="col-lg-12  pt-2">
+                                <!--begin::Title-->
+                                <strong class="align-items-start flex-column mx-9">
+                                    @CreatedOn
+                                </strong>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="col-lg-12  mx-9">
+                                <!--begin::Title-->
+                                <span class="align-items-start flex-column">
+                                    Exp.Del Date
+                                </span>
+                            </div>
+                            <div class="col-lg-12 pt-2  mx-9">
+                                <!--begin::Title-->
+                                <strong class="align-items-start flex-column">
+                                    @ExpDate
+                                </strong>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="col-lg-12  mx-9">
+                                <!--begin::Title-->
+                                <span class="align-items-start flex-column">
+                                    Delivery Slot
+                                </span>
+                            </div>
+                            <div class="col-lg-12 pt-2  mx-9">
+                                <!--begin::Title-->
+                                <strong class="align-items-start flex-column">
+                                    @Slot
+                                </strong>
+                            </div>
+                        </div>
+
+
+
+                        <!--end::Body-->
+                    </div>
+                </div>
+                <!--end::Col-->
+                <!--begin::Col-->
+                <div class="col-xl-3">
+                    <!--begin::Tables widget 14-->
+                    <div class="card card-flush h-md-100">
+
+
+                        <div class="table-responsive" style="padding-left:7%; padding-right:5%; padding-top:2%">
+                            <table class="table mb-0">
+                                <tbody>
+                                    <tr>
+                                        <td class="pb-0">Payment Type</td>
+                                        <th class="pb-0" style="text-align: end;">
+                                            <span id="PayType"> @cus_Type </span>
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <td class="pb-0">Credit Days</td>
+                                        <th class="pb-0" style="text-align: end;">
+
+                                            <span id="CreditDays">@cus_CreditDays</span>
+
+                                        </th>
+                                    </tr>
+
+                                    <tr>
+                                        <td class="pb-0">Total Credit Limit</td>
+                                        <th class="pb-0" style="text-align: end;">
+                                            <span id="TotCredLimit">@cus_TotalCreditLimit</span>
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <td class="pb-0">Used Credit Limit</td>
+                                        <th class="pb-0" style="text-align: end;">
+                                            <span id="UsedCredLimit">@cus_UsedCreditLimit</span>
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <td>Available Credit Limit</td>
+                                        <th style="text-align: end;"><span id="AvCreditLimit">@cus_AvailableCreditLimit</span></th>
+                                    </tr>
+
+                                </tbody>
+                            </table>
+                            @*<hr class="m-0" />*@
+                            <table class="table">
+                                <tbody>
+                                    <tr>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!--end::Tables widget 14-->
+                </div>
+
+                <div class="col-xl-3">
+                    <!--begin::Tables widget 14-->
+                    <div class="card card-flush h-md-100">
+
+
+                        <div class="table-responsive" style="padding-left:7%; padding-right:5%; padding-top:2%">
+                            <table class="table mb-0">
+                                <tbody>
+                                    <tr>
+                                        <td class="pb-0">Total</td>
+                                        <th class="pb-0" style="text-align: end;">
+                                            <span id="Summ_Total">@Total</span>
+
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <td class="pb-0">Discount</td>
+                                        <th class="pb-0" style="text-align: end;">
+                                            <span id="Summ_Discount">@Discount</span>
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <td class="pb-0">Sub Total</td>
+                                        <th class="pb-0" style="text-align: end;">
+                                            <span id="Summ_SubTotal">@subTotal</span>
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <td>VAT</td>
+                                        <th style="text-align: end;"><span id="Summ_VAT">@VAT</span></th>
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+                            <hr class="m-0" />
+                            <table class="table">
+                                <tbody>
+                                    <tr>
+                                        <td>Grand Total</td>
+                                        <th style="text-align: end;"><span id="Summ_GrandTotal">@grandTotal</span></th>
+                                    </tr>
+                                </tbody>
+
+                            </table>
+                        </div>
+
+                    </div>
+                    <!--end::Tables widget 14-->
+                </div>
+                <!--end::Col-->
+            </div>
+            <div class="row g-5 g-xl-10 mb-5 mb-xl-10" style="margin-right:0px" id="lstOrderListing">
+                <div class="col-xl-12 card card-flush mt-2">
+                    <div id="listPartial" class="col-lg-12 mt-5 mb-5">
+                        @{
+                            Html.RenderPartial("ListOrder");
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="row g-5 g-xl-10 mb-5 mb-xl-10" style="margin-right:0px; display:none" id="fg_Actions">
+
+                <div class="col-xl-12 card card-flush mt-2">
+                    <div class="d-flex align-items-center gap-2 gap-lg-3 mt-5" style="align-self:flex-end; ">
+                        <a href="#" onclick="Show_fg_back_popup()" class="btn btn-outline btn-sm  " style="outline:auto !important; ">Back</a>
+                        <a href="#" class="btn btn-sm fw-bold btn-primary" id="btnNext" data-backdrop="static" data-keyboard="false" onclick="NextFreeGood()">
+                            Next
+                        </a>
+                    </div>
+                    <div id="lstFreeGood" class="col-lg-12 mt-5 mb-5">
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <!--end::Content container-->
+    </div>
+    <!--end::Content-->
+</div>
+
+@{
+    Html.RenderPartial("ProceedOrder");
+    Html.RenderPartial("ProceedBack");
+    Html.RenderPartial("SuccessOrder");
+}
+
+<script>
+
+    function Handle_fg_Back() {
+        $('#lstOrderAdding').show('slow');
+        $('#lstOrderListing').show('slow');
+        $('#fg_Actions').hide('slow');
+        $('#btnNext').show();
+        $("#btnNext").text('Next');
+        $('#btnProceed').show();
+        $('#modal_fg_back_popup').modal('hide');
+    }
+
+
+    function Show_fg_back_popup() {
+        $('#modal_fg_back_popup').modal('show');
+    }
+
+
+     function NextFreeGood() {
+
+
+        var values = new Array();
+        var AllID = document.getElementById("itmIds").innerHTML;
+        const listArray = AllID.split('-');
+        var totQty = 0;
+        for (let i = 0; i < listArray.length; i++) {
+            var id = listArray[i].toString();
+            id = id.replace(" ", "");
+            if (id != "") {
+                var qty = $("#fg_Qty_" + id).val();
+
+
+                if (parseInt(qty) > 0) {
+                    totQty = totQty + parseInt(qty);
+
+                    values.push({
+                        itmID: id,
+                        Qty: parseInt(qty)
+                    });
+                }
+            }
+        }
+
+
+
+        var elgQty = document.getElementById("elg_Qty").innerHTML;
+
+        if (totQty == elgQty) {
+
+             $.ajax({
+                type: "POST",
+                url: '@Url.Action("FindNextPromo", "Confirm")',
+                contentType: "application/json; charset=utf-8",
+                 dataType: "json",
+                 data: JSON.stringify({ values }),
+                 success: function (data) {
+                     if (data.nextEnable == "0") {
+                         $("#btnNext").text('Proceed');
+                     } else {
+                         $("#btnNext").text('Next');
+                     }
+
+                  if (data.mode == "P") {
+                      $('#lstFreeGood').load('/Confirm/ShowFreeGood', { csID: cusID });
+                  } else {
+
+                      $('#modal_ord_proceed_popup').modal('show');
+                  }
+                }
+            });
+
+        } else {
+            alert('The eligible qty (' + elgQty + ') and entered qty (' + totQty + ')should be same');
+        }
+
+    }
+
+
+     function ConfirmOrder() {
+         $('#loaderFG').show('slow');
+         var cusID = @Session["cusID"].ToString();
+                $.ajax({
+                type: "GET",
+                url: '@Url.Action("getItemCount", "Confirm")',
+                contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+              success: function (data) {
+                  if (data.res == "1") {
+                      if (data.PrmCount == 0) {
+                          //IN PROCEEDORDER VIEW
+                          $('#modal_ord_proceed_popup').modal('show');
+                      } else {
+                          $('#btnProceed').hide();
+                          $('#lstOrderAdding').hide('slow');
+                          $('#lstOrderListing').hide('slow');
+                          $('#fg_Actions').show('slow');
+                          $('#lstFreeGood').load('/Confirm/ShowFreeGood', { csID: cusID });
+                      }
+                  } else {
+                      toastr.error('You must add atleast one item to place an order');
+                  }
+                }
+            });
+        $('#loaderFG').hide('slow');
+    }
+
+
+    function ShowSummary() {
+         $.ajax({
+                type: "GET",
+                url: '@Url.Action("getSummary", "Order")',
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+              success: function (data) {
+
+                  document.getElementById("Summ_Total").innerHTML = data.Total;
+                  document.getElementById("Summ_Discount").innerHTML = data.Discount;
+                  document.getElementById("Summ_SubTotal").innerHTML = data.SubTotal;
+                  document.getElementById("Summ_VAT").innerHTML = data.VAT;
+                  document.getElementById("Summ_GrandTotal").innerHTML = data.GrandTotal;
+                }
+            });
+    }
+
+
+
+</script>

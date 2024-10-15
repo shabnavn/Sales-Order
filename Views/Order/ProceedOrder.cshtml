@@ -1,0 +1,73 @@
+﻿
+<div class="modal fade" tabindex="-1" id="modal_ord_proceed_popup"  data-backdrop="false" data-keyboard="false" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content position-absolute">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Order</h5>
+              
+                <!--begin::Close-->
+                <div class="btn btn-icon btn-sm btn-active-light-primary ms-2" data-bs-dismiss="modal" aria-label="Close">
+                    <span class="svg-icon svg-icon-2x"></span>
+                </div>
+                <!--end::Close-->
+            </div>
+
+            <div class="modal-body" style="padding-bottom:0px">
+                <h3>Are you sure you want to confirm the order?</h3>
+            </div>
+
+            <div class="modal-body" style="padding-bottom:0px">
+              
+                    <label for="" class="form-label">Order Remarks</label>
+                    <textarea id="ordRemarks" class="form-control"  data-kt-autosize="true"></textarea>
+            </div>
+
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">No</button>
+                <button type="button" onclick="ConfrimProceed()" class="btn btn-primary">Yes</button>
+                <img id="ConfirmLoader" style="display: none;" class="text-center" src="../Content/media/icons/loader.gif" height="38" />
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function ConfrimProceed() {
+        $('#ConfirmLoader').show('slow');
+
+        cusID = $("#Customers").val();
+        remarks = $("#ordRemarks").val();
+        expDelDate = $("#dspDate").val();
+        DelSlot = $("#TimeSlot").val();
+
+        $.ajax({
+                type: "GET",
+                url: '@Url.Action("ProceedOrder", "Order")',
+                contentType: "application/json; charset=utf-8",
+                data: {
+                    "remarks": remarks,
+                    "cusID": cusID,
+                    "expDelDate": expDelDate,
+                    "DelSlot": DelSlot
+                },
+             dataType: "json",
+             success: function (data) {
+                 if (data.res == "1") {
+
+                     $('#OrderID').text(data.Title)
+                     
+                     toastr.success(data.Message);
+                     $('#ConfirmLoader').hide('hide');
+                     $('#modal_ord_proceed_popup').modal('hide');
+                     $('#modal_success_order').modal('show');
+                     
+                 } else {
+                     toastr.error(data.Message);
+                     $('#ConfirmLoader').hide('hide');
+                 }
+             }
+               });
+    }
+</script>

@@ -1,0 +1,169 @@
+﻿@using Sales_Order.Models
+@using System.Data
+@model int
+
+@{
+    if (Model != 0)
+    {
+    <div class="col-lg-12" row>
+      
+        @{
+            DataModel dm = new DataModel();
+            DataTable dtDetail = new DataTable();
+            string mode = Session["mode"].ToString();
+            DataTable dtHeader = (DataTable)Session["dt_fg_prms"];
+        }
+
+        <!--begin::Header-->
+        <!--end::Header-->
+        <!--begin::Scroll-->
+
+        <div id="kt_example_js_content" style="height: 500px ">
+            <div class="row">
+
+                <div class="col-3">
+                    <h3 id="kt_example_js_header" class="pb-5">Applied Promotions</h3>
+
+                    <div class="hover-scroll-overlay-y h-400px px-5">
+                        @{
+                                    if (dtHeader != null)
+                                    {
+                                        string[] arr = new string[dtHeader.Rows.Count];
+                                        int i = 0;
+                                        foreach (DataRow dr in dtHeader.Rows)
+                                        {
+                                            arr[i] = dr["prm_ID"].ToString();
+                                             i++;
+
+                                            string stripClass = "";
+                                            if (Session["prmID"].ToString() == dr["prm_ID"].ToString())
+                                            {
+                                                stripClass = "bgColor";
+                                            }
+
+                                    <div id="lst_@dr["prm_ID"].ToString()" class="d-flex flex-stack position-relative mt-8">
+                                        <div class="position-absolute @stripClass  h-100 w-4px rounded top-0 start-0"></div>
+                                        <div class="fw-semibold ms-5 text-gray-600" style="margin:10px">
+                                            <a href="#" class="fs-5 fw-bold text-gray-800 text-hover-primary mb-2"> @dr["prm_Name"].ToString() </a>
+                                        </div>
+                                    </div>
+                                }
+                                Session["prmIDArr"] = arr;
+                        }
+
+
+                        }
+                    </div>
+                </div>
+
+                <div class=" col-lg-1 vl " style="width:0px"></div>
+
+                <div class="col-8">
+
+                    @{
+                        string find = "prm_ID = '" + Session["prmID"].ToString() + "'";
+                        DataRow[] drHeader = dtHeader.Select(find);
+
+                        <div class="col-lg-12 row">
+                            <div class="col-lg-3">
+                                <span>Promo Description:</span>
+                                <h3> @drHeader[0]["prm_Name"].ToString() </h3>
+                            </div>
+                            <div class="col-lg-3">
+                                <span>Promo ID:</span>
+                                <h3>@drHeader[0]["prm_Number"].ToString()</h3>
+                            </div>
+                            <div class="col-lg-4" style="display:flex">
+                                <span style="margin-top:15px">Max Allowed Qty:</span>
+                                <div class="fw-semibold text-gray-600 rounded" style="padding: 10px; background-color: #9d9d9d40; margin-left: 10px">
+                                    <span style="font-size:17px">PC : <span id="elg_Qty">@drHeader[0]["prr_Value"].ToString()</span> </span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+
+                    <div class="col-lg-12 row mt-5 hover-scroll-overlay-y h-400px px-5">
+                        <div class="table-responsive ">
+                            <table class="table table-row-dashed table-row-gray-300  rounded border-2 " style="border-style:groove">
+                                <thead>
+                                    <tr class="fw-semibold fs-6 text-gray-800 border-bottom border-gray-200" style="background-color:lightgray; ">
+                                        <th class="tb_padding" style="border-right: groove">Name</th>
+                                        <th class="tb_padding">Quantity</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                    @{
+                                        int x = 0;
+                                        dtDetail = dm.loadList("SelPromoAssignItems", "sp_Web_SalesOrder", Session["prmID"].ToString(), mode);
+                                        string itmIDs = "";
+                                        foreach (DataRow dr in dtDetail.Rows)
+                                        {
+                                            x++;
+                                            <tr>
+                                                <span id="fg_itmID_@dr["itmID"].ToString()" style="display:none"></span>
+                                                <td class="tb_padding"> @dr["itmName"].ToString() </td>
+                                                <td class="tb_padding">
+                                                    @(Html.Kendo().NumericTextBox<int>()
+        .Name("fg_Qty_" + dr["itmID"].ToString())
+        .Format("#")
+        .Placeholder("Enter Qty")
+        .Min(0)
+        .Value(0)
+        .Max(Int32.Parse(drHeader[0]["prr_Value"].ToString()))
+        .HtmlAttributes(new { title = "numeric", @tabindex = "300" + dr["itmID"].ToString() + x.ToString(), @class = "form-control", @AutoComplete = "off" })
+              )
+                                                </td>
+                                            </tr>
+
+                                            itmIDs += dr["itmID"].ToString() + "-";
+
+                                        }
+
+                                        <span id="itmIds" style="display:none"> @itmIDs </span>
+                                    }
+
+                                </tbody>
+                            </table>
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+    }
+}
+
+
+
+
+
+<script>
+   
+</script>
+
+
+<style>
+
+
+    .bgColor {
+        background-color: blue
+    }
+
+    .vl {
+        border-left: 3px solid #cbddc6f5;
+        height: 500px
+    }
+
+    .tb_padding {
+        padding-left: 10px !important;
+        padding-right: 10px !important;
+        padding-top: 2px !important;
+        padding-bottom: 1px !important;
+    }
+</style>

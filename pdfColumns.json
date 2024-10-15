@@ -1,0 +1,13 @@
+{
+  "Columns": [
+    {
+      "pdfColumns": "S#-Item Code-Item Name-HUOM-H.Qty-H.Price-LUOM-L.Qty-L.Price-Type-Total-Discount-Sub Total-VAT-Grand Total",
+      "dtColumns": "S#-itm_Code-itm_Name-HUOM-odd_HigherQty-odd_HigherPrice-LUOM-odd_LowerQty-odd_LowerPrice-odd_TransType-odd_Price-odd_Discount-odd_SubTotal-odd_VATAmount-odd_GrandTotal",
+      "colWidth": "170-450-1000-350-300-400-400-300-400-240-300-400-400-300-500",
+      "colSpan": "10",
+      "HeaderColor": "#63666A",
+      "FooterColor": "#63666A"
+    }
+
+  ]
+}

@@ -1,0 +1,173 @@
+﻿@using System.Data
+@using Sales_Order.Models
+
+
+@( Html.Kendo().Grid<Items>
+    ()
+    .Name("grvItems")
+    .Columns(columns =>
+    {
+        columns.Bound(p => p.itmName).Width(200).Title("Item").Editable("returnFalse")
+            .Filterable(ftb => ftb.Multi(true).Search(true).ItemTemplate("itmFilter"));
+        columns.Bound(p => p.HuomName).Width(50).ClientTemplate("#=HuomName#").Title("H.UOM").Filterable(false);
+        columns.Bound(p => p.H_Price).Width(50).Filterable(false).Title("H.Price").Editable("returnFalse");
+        columns.Bound(p => p.H_Qty).Width(50).Filterable(false).Title("H.Qty");
+        columns.Bound(p => p.LuomName).Width(50).Filterable(false).Title("L.UOM");
+        columns.Bound(p => p.L_Qty).Width(50).Filterable(false).Title("L.Qty");
+        columns.Bound(p => p.L_Price).Width(50).Filterable(false).Title("L.Price").Editable("returnFalse");
+        columns.Bound(p => p.Total).Width(50).Filterable(false).Title("Total").Editable("returnFalse");
+        columns.Bound(p => p.Discount).Width(50).Filterable(false).Title("Discount").Editable("returnFalse");
+        columns.Bound(p => p.SubTotal).Width(50).Filterable(false).Title("Sub Total").Editable("returnFalse");
+        columns.Bound(p => p.VAT).Width(50).Filterable(false).Title("VAT").Editable("returnFalse");
+        columns.Bound(p => p.GrandTotal).Width(50).Filterable(false).Title("Grand Total").Editable("returnFalse");
+        columns.Command(command => { command.Custom("Edit").Click("onEditClick").HtmlAttributes(new { @class = "btn btn-primary", @style = "padding-bottom:5px; padding-top:5px" });
+            command.Custom("Delete").Click("OnDeleteClick").HtmlAttributes(new { @class = "btn btn-outline-danger border" , @style= "margin-left:5px;padding-bottom:5px; padding-top:5px" }); }).Width(50);
+    })
+    .Events(e => e.DataBound("dataBoundHandler"))
+    //.HtmlAttributes(new { style = "height: 550px;" })
+    .Filterable()
+    .Editable(editable => editable.Mode(GridEditMode.PopUp).TemplateName("GridEditView"))
+    .Pageable()
+    .Navigatable()
+    .Sortable()
+    //.Scrollable(scr=>scr.Height(550))
+    .DataSource(dataSource => dataSource
+    .Ajax()
+    .Batch(true)
+    .PageSize(10)
+    .Model(model =>
+    {
+        model.Id(p => p.itmID);
+        model.Field(p => p.HuomName);
+    })
+    .ServerOperation(false)
+    .Read("GetOrdItems", "Order" )
+    .Update("GetOrdItems", "Order")
+    )
+    )
+@{
+    Html.RenderPartial("GridEditView");
+    Html.RenderPartial("DeleteItem");
+   
+
+}
+
+<script>
+    function dataBoundHandler() {
+        $(".btn").removeClass("k-button"); 
+    }
+
+    // Make the DIV element draggable:
+    var element = document.querySelector('#modal_edit_popup');
+    var del_element = document.querySelector('#modal_del_popup');
+    dragElement(element);
+    dragElement(del_element);
+
+    function OnDeleteClick() {
+
+        var row = $(event.srcElement).closest("tr");
+        var grid = $(event.srcElement).closest("[data-role=grid]").data("kendoGrid");
+        var dataItem = grid.dataItem(row);
+
+        //ITEM Details
+        $('#grdDelItmID').text(dataItem.itmID);
+
+        $('#modal_del_popup').modal('show');
+    }
+
+
+    function onEditClick() {
+        var row = $(event.srcElement).closest("tr");
+        var grid = $(event.srcElement).closest("[data-role=grid]").data("kendoGrid");
+        var dataItem = grid.dataItem(row);
+
+        //ITEM Details
+        $('#grdItemName').text(dataItem.itmName);
+        $('#grdItmID').text(dataItem.itmID);
+        $('#grdSeqNo').text(dataItem.SeqNo);
+        
+        //HUOM
+        var ddl_H_UOM = $("#editHUOM").data("kendoMultiColumnComboBox");
+        ddl_H_UOM.dataSource.read();
+        ddl_H_UOM.focus();
+        ddl_H_UOM.value(dataItem.H_UOM);
+        $('#edit_H_Offer_Price').text(dataItem.H_Price);
+        $("#editHQty").data("kendoNumericTextBox").value(dataItem.H_Qty);
+
+        ////LUOM
+        var ddl_L_UOM = $("#editLUOM").data("kendoMultiColumnComboBox");
+        ddl_L_UOM.dataSource.read();
+        if (dataItem.L_UOM != "0") {
+            ddl_L_UOM.value(dataItem.L_UOM);
+        }
+      
+        $('#edit_L_Offer_Price').text(dataItem.L_Price);
+        $("#editLQty").data("kendoNumericTextBox").value(dataItem.L_Qty);
+
+        //TOTAL
+        $('#edit_TotalPrice').text(dataItem.Total);
+
+
+        $('#modal_edit_popup').modal('show');
+
+    }
+   
+
+    function returnFalse() {
+        return false;
+    }
+    function itmFilter(e) {
+
+        if (e.field == "all") {
+
+            return "<div class='chek-form><div class='custome-checkbox'><input class='form-check-input mb-1' type='checkbox'  /> <strong>#= all#</strong> </div></div>";
+        } else {
+            return "<div class='chek-form><div class='custome-checkbox'><input class='form-check-input mb-1' type='checkbox' name='" + e.field + "'  value='#=itmName#' /><label class='form-check-label' for='exampleCheckbox1'><span>#: itmName #</span></label></div></div>";
+        }
+
+    }
+
+
+    function dragElement(elmnt) {
+        var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+        if (elmnt.querySelector('.modal-content')) {
+            // if present, the header is where you move the DIV from:
+            elmnt.querySelector('.modal-content').onmousedown = dragMouseDown;
+        } else {
+            // otherwise, move the DIV from anywhere inside the DIV:
+            elmnt.onmousedown = dragMouseDown;
+        }
+
+        function dragMouseDown(e) {
+            e = e || window.event;
+            e.preventDefault();
+            // get the mouse cursor position at startup:
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            document.onmouseup = closeDragElement;
+            // call a function whenever the cursor moves:
+            document.onmousemove = elementDrag;
+        }
+
+        function elementDrag(e) {
+            e = e || window.event;
+            e.preventDefault();
+            // calculate the new cursor position:
+            pos1 = pos3 - e.clientX;
+            pos2 = pos4 - e.clientY;
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            // set the element's new position:
+            elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+            elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+        }
+
+        function closeDragElement() {
+            // stop moving when mouse button is released:
+            document.onmouseup = null;
+            document.onmousemove = null;
+        }
+    }
+
+
+</script>
