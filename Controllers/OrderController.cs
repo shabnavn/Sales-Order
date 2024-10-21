@@ -53,14 +53,16 @@ namespace Sales_Order.Controllers
             return View();
         }
 
-        public JsonResult GetCustomer(string routeId)
+        public JsonResult GetCustomer()
         {
             try
             {
-                
+                DataTable dtItems = (DataTable)Session["dtItems"];
+                dtItems.Rows.Clear();
+
                 string mode = Session["mode"].ToString();
 
-                DataTable dt = dm.loadList("SelCustomer", "sp_Web_SalesOrder", routeId,mode);
+                DataTable dt = dm.loadList("SelCustomer", "sp_Web_SalesOrder", mode);
 
                 List<Customer> lst = new List<Customer>();
                 foreach (DataRow dr in dt.Rows)
@@ -71,19 +73,24 @@ namespace Sales_Order.Controllers
                     lst.Add(lstOrders);
                 }
                 return Json(lst, JsonRequestBehavior.AllowGet);
-            }catch (Exception ex)
+
+            }
+            catch (Exception ex)
             {
                 return null;
             }
             
         }
-        public JsonResult GetRoute()
+        public JsonResult GetRoute(string cusID)
         {
             try
             {
+                DataTable dtItems = (DataTable)Session["dtItems"];
+                dtItems.Rows.Clear();
+
                 string mode = Session["mode"].ToString();
 
-                DataTable dt = dm.loadList("SelRoute", "sp_Web_SalesOrder", mode);
+                DataTable dt = dm.loadList("SelRoute", "sp_Web_SalesOrder",cusID, mode);
 
                 List<route> lst = new List<route>();
                 foreach (DataRow dr in dt.Rows)
@@ -312,10 +319,12 @@ namespace Sales_Order.Controllers
         }
 
         [CheckSession]
-        public JsonResult AddItem(string itmID,  string cusID ,string rotID, int? H_uom_ID = 0, int? H_Qty = 0 , int? L_uom_ID = 0 , int? L_Qty = 0 , int? CallMode = 0 , int? SeqNo = 0 )
+        public JsonResult AddItem(string itmID,  string cusID ,string rotID, string isFreeSampleCustomer, int? H_uom_ID = 0, int? H_Qty = 0 , int? L_uom_ID = 0 , int? L_Qty = 0 , int? CallMode = 0 , int? SeqNo = 0 )
         {
             try
             {
+                Session["FreeSample"] = isFreeSampleCustomer;
+
                 DataTable dt = (DataTable)Session["dtItems"];
                 string mode = Session["mode"].ToString();
                 string rot,cus;
@@ -438,12 +447,24 @@ namespace Sales_Order.Controllers
         public ActionResult GetOrdItems([DataSourceRequest] DataSourceRequest request)
         {
             string mode = Session["mode"].ToString();
-
+            string freesample = "";
             //DataTable dt = dm.loadList("SelOrders", "sp_B2B_Orders", Session["CusID"].ToString() ,  mode );
 
             DataTable dt = (DataTable) Session["dtItems"];
 
             List<Items> lst = new List<Items>();
+
+            try
+            {
+                if (Session["FreeSample"]!=null)
+                {
+                    freesample = Session["FreeSample"].ToString();
+                }
+            }
+            catch(Exception ex)
+            {
+
+            }
             for (int i = 0; i < dt.Rows.Count; i++)
             {
                 Items lstOrders = new Items();
@@ -461,10 +482,10 @@ namespace Sales_Order.Controllers
                 lstOrders.Total = dt.Rows[i]["TotalPrice"].ToString();
                 lstOrders.HuomName = dt.Rows[i]["HUomName"].ToString();
                 lstOrders.LuomName = dt.Rows[i]["LUomName"].ToString();
-                lstOrders.SubTotal = dt.Rows[i]["SubTotal"].ToString();
-                lstOrders.Discount = dt.Rows[i]["Discount"].ToString();
-                lstOrders.VAT = dt.Rows[i]["VAT"].ToString();
-                lstOrders.GrandTotal = dt.Rows[i]["GrandTotal"].ToString();
+                lstOrders.SubTotal = freesample == "Y" ? "0" : dt.Rows[i]["SubTotal"].ToString();
+                lstOrders.Discount = freesample=="Y"? dt.Rows[i]["SubTotal"].ToString():dt.Rows[i]["Discount"].ToString();
+                lstOrders.VAT = freesample == "Y" ? "0":dt.Rows[i]["VAT"].ToString();
+                lstOrders.GrandTotal = freesample == "Y" ? "0" : dt.Rows[i]["GrandTotal"].ToString();
                 lst.Add(lstOrders);
             }
             DataSourceResult result = lst.ToDataSourceResult(request, p => new Models.Items
@@ -505,6 +526,7 @@ namespace Sales_Order.Controllers
                 string[] ar = { rotID };
 
                 DataTable dt = dm.loadList("SelCusCrLimits", "sp_Web_SalesOrder", cusID,ar, mode);
+                DataTable dtFSO = dm.loadList("SelSettingsforQuotationandFreeSample", "sp_Web_SalesOrder", cusID, ar, mode);
                 CusCrTerms lstOrders = new CusCrTerms();
                 if (dt.Rows.Count > 0)
                 {
@@ -515,6 +537,22 @@ namespace Sales_Order.Controllers
                         lstOrders.UsedCr = dr["cus_UsedCreditLimit"].ToString();
                         lstOrders.crDays = dr["cus_CreditDays"].ToString();
                         lstOrders.AvlCr = dr["cus_AvailableCreditLimit"].ToString();
+                        if (dtFSO.Rows.Count > 0)
+                        {
+                            lstOrders.isFreeSampleCustomer = dtFSO.Rows[0]["rcs_EnableFreeSampleOrderApproval"].ToString();
+                            lstOrders.IsQuotationCustomer = dtFSO.Rows[0]["rcs_EnableQuotation"].ToString();
+                            lstOrders.IsPriceChange = dtFSO.Rows[0]["rcs_EnablePriceChange"].ToString();
+                            lstOrders.IsPriceChangeApproval = dtFSO.Rows[0]["rcs_EnableOrdPriceChange"].ToString();
+                        }
+                        else
+                        {
+                            lstOrders.isFreeSampleCustomer = "N";
+                            lstOrders.IsQuotationCustomer = "N";
+                            lstOrders.IsPriceChange = "N";
+                            lstOrders.IsPriceChangeApproval = "N";
+                        }
+                            
+
                     }
                 }
                 else
@@ -524,6 +562,20 @@ namespace Sales_Order.Controllers
                     lstOrders.UsedCr = "";
                     lstOrders.crDays = "";
                     lstOrders.AvlCr = "";
+                    if (dtFSO.Rows.Count > 0)
+                    {
+                        lstOrders.isFreeSampleCustomer = dtFSO.Rows[0]["rcs_EnableFreeSampleOrderApproval"].ToString();
+                        lstOrders.IsQuotationCustomer = dtFSO.Rows[0]["rcs_EnableQuotation"].ToString();
+                        lstOrders.IsPriceChange = dtFSO.Rows[0]["rcs_EnablePriceChange"].ToString();
+                        lstOrders.IsPriceChangeApproval = dtFSO.Rows[0]["rcs_EnableOrdPriceChange"].ToString();
+                    }
+                    else
+                    {
+                        lstOrders.isFreeSampleCustomer = "N";
+                        lstOrders.IsQuotationCustomer = "N";
+                        lstOrders.IsPriceChange = "N";
+                        lstOrders.IsPriceChangeApproval = "N";
+                    }
                 }
                 return Json(lstOrders, JsonRequestBehavior.AllowGet);
             }
@@ -587,25 +639,37 @@ namespace Sales_Order.Controllers
 
         }
 
-        public JsonResult getSummary()
+        public JsonResult getSummary(string isFreeSampleCustomer)
         {
             try
             {
-                
-
-                DataTable dt = (DataTable)Session["dtSummary"];
-
                 ordSummary ord = new ordSummary();
-                foreach(DataRow dr in dt.Rows)
-                {
-                    ord.Total = dr["TotalPrice"].ToString();
-                    ord.Discount = dr["Discount"].ToString();
-                    ord.SubTotal = dr["SubTotal"].ToString();
-                    ord.VAT = dr["VAT"].ToString();
-                    ord.GrandTotal = dr["GrandTotal"].ToString();
-                }
 
-                Session["OrdSummary"] = ord;
+                if (isFreeSampleCustomer == "Y")
+                {
+                    ord.Total = "0.00";
+                    ord.Discount = "0.00";
+                    ord.SubTotal = "0.00";
+                    ord.VAT = "0.00";
+                    ord.GrandTotal = "0.00";
+
+                    Session["OrdSummary"] = ord;
+                }
+                else
+                {
+                    DataTable dt = (DataTable)Session["dtSummary"];
+                    foreach (DataRow dr in dt.Rows)
+                    {
+                        ord.Total = dr["TotalPrice"].ToString();
+                        ord.Discount = dr["Discount"].ToString();
+                        ord.SubTotal = dr["SubTotal"].ToString();
+                        ord.VAT = dr["VAT"].ToString();
+                        ord.GrandTotal = dr["GrandTotal"].ToString();
+                    }
+
+                    Session["OrdSummary"] = ord;
+                }
+                
 
 
                 return Json(ord, JsonRequestBehavior.AllowGet);
@@ -626,9 +690,33 @@ namespace Sales_Order.Controllers
                 DataTable dtItems = (DataTable)Session["dtItems"];
                 DataTable dt_fg_Items = (DataTable)Session["dt_fg_Items"];
                 string x = Session["UserID"].ToString();
+                string imagePath = "";
+                string isfreesample = Session["FreeSample"].ToString();
+
+                try
+                {
+                    if (Session["GridLPO"] != null)
+                    {
+                        imagePath = Session["GridLPO"].ToString();
+                        Session["GridLPO"] = null;
+                    }
+                    else
+                    {
+                        Session["GridLPO"] = null;
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    Session["GridLPO"] = null;
+                }
+
+
+
 
                 string[] arr = { input.remarks == null ? "" : input.remarks,  Session["UserID"].ToString(), ordSummary.Total , ordSummary.Discount , ordSummary.SubTotal , ordSummary.VAT , ordSummary.GrandTotal , // Para8
-                 input.expDelDate , input.DelSlot, dm.BuildXML(dtItems).ToString() ,  dm.BuildXML(dt_fg_Items).ToString()  }; //para12
+                 input.expDelDate , input.DelSlot==null?"":input.DelSlot, dm.BuildXML(dtItems).ToString() ,  dm.BuildXML(dt_fg_Items).ToString(),input.rotID ,
+                    input.LPO==null?"":input.LPO,imagePath,input.Type,isfreesample }; //para12
                 DataTable dt = dm.loadList("InsOrderByCus", "sp_Web_SalesOrder", input.cusID, arr, mode);
 
                 if (dt.Rows.Count > 0)
@@ -898,6 +986,165 @@ namespace Sales_Order.Controllers
 
            
         }
+
+
+
+        public ActionResult Async_Save(IEnumerable<HttpPostedFileBase> files)
+        {
+            // The Name of the Upload component is "files"
+            if (files != null)
+            {
+                foreach (var file in files)
+                {
+                    try
+                    {
+
+                        var fileName = Path.GetFileName(file.FileName);
+                        var physicalPath = Path.Combine(Server.MapPath("~/UploadFiles/GridOrderLPO"), fileName);
+                        ViewBag.physicalPath = physicalPath;
+                        Session["GridLPO"] = "../UploadFiles/GridOrderLPO" + fileName;
+                        // The files are not actually saved in this demo
+                        file.SaveAs(physicalPath);
+                    }
+                    catch (Exception ex)
+                    {
+
+                    }
+
+
+                }
+            }
+
+            // Return an empty string to signify success
+            return Content("");
+        }
+
+        public ActionResult Async_Remove(string[] fileNames)
+        {
+            // The parameter of the Remove action must be called "fileNames"
+
+            if (fileNames != null)
+            {
+                foreach (var fullName in fileNames)
+                {
+                    var fileName = Path.GetFileName(fullName);
+                    var physicalPath = Path.Combine(Server.MapPath("~/UploadFiles/GridOrderLPO"), fileName);
+
+                    // TODO: Verify user permissions
+
+                    if (System.IO.File.Exists(physicalPath))
+                    {
+                        // The files are not actually removed in this demo
+                        System.IO.File.Delete(physicalPath);
+                        Session["GridLPO"] = null;
+                    }
+                }
+            }
+
+            // Return an empty string to signify success
+            return Content("");
+        }
+
+
+        public string PostPriceUpdate(PUIn inputParams)
+        {
+        
+            try
+            {
+                List<PUItemData> itemData = JsonConvert.DeserializeObject<List<PUItemData>>(inputParams.JSONString);
+                try
+                {
+                    string rotID = inputParams.rotID == null ? "0" : inputParams.rotID;
+                    string cusID = inputParams.cusID == null ? "PA" : inputParams.cusID;
+                    string usrID = inputParams.usrID == null ? "0" : inputParams.usrID;
+                    string OrderNo = inputParams.OrderNo == null ? "0" : inputParams.OrderNo;
+                    string ReqID = inputParams.ReqID == null ? "0" : inputParams.ReqID;
+                    string TotalCreditlimit = inputParams.TotalCreditlimit == null ? "0" : inputParams.TotalCreditlimit;
+
+                    string InputXml = "";
+                    using (var sw = new StringWriter())
+                    {
+                        using (var writer = XmlWriter.Create(sw))
+                        {
+
+                            writer.WriteStartDocument(true);
+                            writer.WriteStartElement("r");
+                            int c = 0;
+                            foreach (PUItemData id in itemData)
+                            {
+                                string[] arr = { id.ItemId.ToString(), id.HigherUOM.ToString(), id.HigherQty.ToString(), id.stdHprice, id.chngdHprice, id.LowerUOM.ToString(), id.LowerQty.ToString(), id.stdLprice, id.chngdLprice, id.ReasonId.ToString(), id.Flag.ToString(), id.HigherLimitPercent, id.LowerLimtPercent };
+                                string[] arrName = { "ItemId", "HigherUOM", "HigherQty", "stdHprice", "chngdHprice", "LowerUOM", "LowerQty", "stdLprice", "chngdLprice", "ReasonId", "Flag", "HigherLimitPercent", "LowerLimtPercent" };
+                                dm.createNode(arr, arrName, writer);
+                            }
+
+                            writer.WriteEndElement();
+                            writer.WriteEndDocument();
+                            writer.Close();
+                        }
+                        InputXml = sw.ToString();
+
+                    }
+
+                    try
+                    {
+                        string[] arr = { cusID.ToString(),usrID.ToString(), InputXml.ToString(), ReqID.ToString(), OrderNo.ToString(), TotalCreditlimit.ToString() };
+                        string Value = dm.SaveData("sp_PriceUpdateApproval", "InsPriceChangeForApproval", rotID.ToString(), arr);
+                        int Output = Int32.Parse(Value);
+                        List<GetPriceUpdateStatus> listStatus = new List<GetPriceUpdateStatus>();
+                        if (Output > 0)
+                        {
+                            
+                            string Json = "";
+                            // WebServiceCal(url, Json);
+                           
+
+                            listStatus.Add(new GetPriceUpdateStatus
+                            {
+                                Mode = "1",
+                                Status = "Price Update for approval submitted successfully"
+                            });
+                            string JSONString = JsonConvert.SerializeObject(new
+                            {
+                                result = listStatus
+                            });
+                            return JSONString;
+
+
+                        }
+                        else
+                        {
+                            listStatus.Add(new GetPriceUpdateStatus
+                            {
+                                Mode = "0",
+                                Status = "Price Update for approval submission failed"
+                            });
+                            string JSONString = JsonConvert.SerializeObject(new
+                            {
+                                result = listStatus
+                            });
+                            return JSONString;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                      
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                  
+                }
+            }
+            catch (Exception ex)
+            {
+                
+            }
+            
+            return "JSONString";
+        }
+
+
 
     }
 }

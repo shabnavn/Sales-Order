@@ -1,4 +1,29 @@
-﻿
+﻿<div class="modal fade" tabindex="-1" id="modal_ord_restricted_popup" data-backdrop="false" data-keyboard="false" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content position-absolute">
+            <div class="modal-header">
+                <h5 class="modal-title">Restricted Order</h5>
+
+                <!--begin::Close-->
+                <div class="btn btn-icon btn-sm btn-active-light-primary ms-2" data-bs-dismiss="modal" aria-label="Close">
+                    <span class="svg-icon svg-icon-2x"></span>
+                </div>
+                <!--end::Close-->
+            </div>
+
+            <div class="modal-body" style="padding-bottom:0px">
+                <h3>Your Credit Limits Or Credit Days are Exceeded</h3>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">OK</button>
+                <img id="ConfirmLoader" style="display: none;" class="text-center" src="../Content/media/icons/loader.gif" height="38" />
+            </div>
+        </div>
+
+    </div>
+</div>
+
 <div class="modal fade" tabindex="-1" id="modal_ord_proceed_popup"  data-backdrop="false" data-keyboard="false" role="dialog">
     <div class="modal-dialog">
         <div class="modal-content position-absolute">
@@ -13,7 +38,7 @@
             </div>
 
             <div class="modal-body" style="padding-bottom:0px">
-                <h3>Are you sure you want to confirm the order?</h3>
+                <h3>Please choose how you would like to proceed with this order:</h3>
             </div>
 
             <div class="modal-body" style="padding-bottom:0px">
@@ -24,8 +49,9 @@
 
 
             <div class="modal-footer">
-                <button type="button" class="btn btn-light" data-bs-dismiss="modal">No</button>
-                <button type="button" onclick="ConfrimProceed()" class="btn btn-primary">Yes</button>
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" onclick="ConfrimProceed()" class="btn btn-primary">Sales Order</button>
+                <button type="button" id="quotaion" onclick="Quotation()" class="btn btn-primary">Quotation</button>
                 <img id="ConfirmLoader" style="display: none;" class="text-center" src="../Content/media/icons/loader.gif" height="38" />
             </div>
         </div>
@@ -34,13 +60,21 @@
 </div>
 
 <script>
+
+    isFreeSampleCustomer = document.getElementById("isFreeSampleCustomer").value;
+    IsQuotationCustomer = document.getElementById("IsQuotationCustomer").value;
+
+
     function ConfrimProceed() {
         $('#ConfirmLoader').show('slow');
 
         cusID = $("#Customers").val();
+        rotID = $("#Route").val();
         remarks = $("#ordRemarks").val();
         expDelDate = $("#dspDate").val();
         DelSlot = $("#TimeSlot").val();
+        LPO = document.getElementById("LPO").value;
+        
 
         $.ajax({
                 type: "GET",
@@ -50,19 +84,22 @@
                     "remarks": remarks,
                     "cusID": cusID,
                     "expDelDate": expDelDate,
-                    "DelSlot": DelSlot
+                    "DelSlot": DelSlot,
+                    "rotID": rotID,
+                    "LPO": LPO,
+                    "Type": "O"
                 },
              dataType: "json",
              success: function (data) {
                  if (data.res == "1") {
 
                      $('#OrderID').text(data.Title)
-                     
+
                      toastr.success(data.Message);
                      $('#ConfirmLoader').hide('hide');
                      $('#modal_ord_proceed_popup').modal('hide');
                      $('#modal_success_order').modal('show');
-                     
+
                  } else {
                      toastr.error(data.Message);
                      $('#ConfirmLoader').hide('hide');
@@ -70,4 +107,50 @@
              }
                });
     }
+
+
+    function Quotation() {
+    $('#ConfirmLoader').show('slow');
+
+    cusID = $("#Customers").val();
+    rotID = $("#Route").val();
+    remarks = $("#ordRemarks").val();
+    expDelDate = $("#dspDate").val();
+    DelSlot = $("#TimeSlot").val();
+    LPO = LPO = document.getElementById("LPO").value;
+
+    $.ajax({
+            type: "GET",
+            url: '@Url.Action("ProceedOrder", "Order")',
+            contentType: "application/json; charset=utf-8",
+            data: {
+                "remarks": remarks,
+                "cusID": cusID,
+                "expDelDate": expDelDate,
+                "DelSlot": DelSlot,
+                "rotID": rotID,
+                "LPO": LPO,
+                "Type": "D"
+            },
+         dataType: "json",
+         success: function (data) {
+             if (data.res == "1") {
+
+                 $('#OrderID').text(data.Title)
+
+                 toastr.success(data.Message);
+                 $('#ConfirmLoader').hide('hide');
+                 $('#modal_ord_proceed_popup').modal('hide');
+                 $('#modal_success_order').modal('show');
+
+             } else {
+                 toastr.error(data.Message);
+                 $('#ConfirmLoader').hide('hide');
+             }
+         }
+           });
+    }
+
+   
+
 </script>

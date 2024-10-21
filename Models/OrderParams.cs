@@ -80,6 +80,11 @@ namespace Sales_Order.Models
         public string AvlCr { get; set; }
         public string crDays { get; set; }
         public string cusType { get; set; }
+        public string isFreeSampleCustomer { get; set; }
+        public string IsQuotationCustomer { get; set; }
+        public string IsPriceChange { get; set; }
+        public string IsPriceChangeApproval { get; set; }
+
 
     }
 
@@ -99,6 +104,9 @@ namespace Sales_Order.Models
         public string remarks { get; set; }
         public string expDelDate { get; set; }
         public string DelSlot { get; set; }
+        public string rotID { get; set; }
+        public string LPO { get; set; }
+        public string Type { get; set; }
     }
 
     public class fg_items
@@ -117,6 +125,41 @@ namespace Sales_Order.Models
     {
         public string rotName { get; set; }
         public string rotID { get; set; }
+    }
+    public class PUIn
+    {
+        public string rotID { get; set; }
+        public string cusID { get; set; }
+        public string udpID { get; set; }
+        public string usrID { get; set; }
+        public string ReqID { get; set; }
+        public string OrderNo { get; set; }
+        public string JSONString { get; set; }
+        public string TotalCreditlimit { get; set; }
+    }
+    public class PUItemData
+    {
+        public string ItemId { get; set; }
+        public string HigherUOM { get; set; }
+        public string HigherQty { get; set; }
+        public string stdHprice { get; set; }
+        public string chngdHprice { get; set; }
+        public string LowerUOM { get; set; }
+        public string LowerQty { get; set; }
+        public string stdLprice { get; set; }
+        public string chngdLprice { get; set; }
+        public string ReasonId { get; set; }
+        public string Flag { get; set; }
+        public string HigherLimitPercent { get; set; }
+        public string LowerLimtPercent { get; set; }
+
+
+    }
+    public class GetPriceUpdateStatus
+    {
+        public string pchID { get; set; }
+        public string Mode { get; set; }
+        public string Status { get; set; }
     }
 
 

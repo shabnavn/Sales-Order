@@ -181,7 +181,7 @@ namespace Sales_Order.Controllers
 
                 if (editMode.Equals("1"))
                 {
-                    string[] arr = { Session["UserID"].ToString(), remarks, dm.BuildXML(dtItems).ToString(), dm.BuildXML(dt_fg_Items).ToString() };
+                    string[] arr = { Session["UserID"].ToString(), remarks, dm.BuildXML(dtItems).ToString(), dm.BuildXML(dt_fg_Items).ToString()};
                     dt = dm.loadList("UpdateOrder", "sp_Web_ConfirmOrder", Session["OrderID"].ToString(), arr, mode);
                 }
                 else

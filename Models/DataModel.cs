@@ -347,5 +347,86 @@ namespace Sales_Order.Models
             writer.WriteEndElement();
             return writer;
         }
+
+        public string SaveData(string ProcedureName, string Mode, string Para1, string[] Paras)
+        {
+            //
+            SqlConnection cn = null;
+            SqlCommand cmd = null;
+
+            try
+            {
+                //
+                cmd = new SqlCommand();
+                cn = FunMyCon(ref cn);
+
+                {
+                    cmd.Connection = cn;
+                    cmd.CommandText = ProcedureName;
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.Parameters.AddWithValue("@Mode", Mode);
+                    cmd.Parameters.AddWithValue("@Para1", Para1);
+                    cmd.Parameters.Add(new SqlParameter("@Res", SqlDbType.NVarChar, 50));
+                    cmd.Parameters["@Res"].Direction = ParameterDirection.Output;
+
+                    for (int i = 0; i < Paras.Length; i++)
+                    {
+                        cmd.Parameters.AddWithValue("@Para" + (i + 2).ToString(), Paras[i].ToString());
+
+                    }
+
+
+
+                    cmd.ExecuteNonQuery();
+
+                    return cmd.Parameters["@Res"].Value.ToString();
+                }
+
+            }
+            catch (SqlException ex)
+            {
+                String innerMessage = (ex.InnerException != null) ? ex.InnerException.Message : "";
+                return ex.Message.ToString();
+
+            }
+            catch (Exception ex)
+            {
+                String innerMessage = (ex.InnerException != null) ? ex.InnerException.Message : "";
+                return ex.Message.ToString();
+
+            }
+            finally
+            {
+
+                cn.Close();
+                cmd.Dispose();
+
+            }
+
+        }
+
+        public SqlConnection FunMyCon(ref SqlConnection _Conn)
+        {
+            string _ConStr = null;
+            if (_Conn == null)
+            {
+                _ConStr = ConfigurationManager.AppSettings.Get("DIGITS-LMD");
+
+                _Conn = new SqlConnection(_ConStr);
+                _Conn.Open();
+            }
+            else
+            {
+                if (_Conn.State == ConnectionState.Closed)
+                {
+                    _ConStr = ConfigurationManager.AppSettings.Get("DIGITS-LMD");
+                    _Conn = new SqlConnection(_ConStr);
+                    _Conn.Open();
+                }
+            }
+            return _Conn;
+        }
+
     }
 }

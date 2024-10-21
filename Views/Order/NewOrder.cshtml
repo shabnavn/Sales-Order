@@ -59,6 +59,43 @@
                             <div class="col-lg-12 pt-5">
                                 <!--begin::Title-->
                                 <span class="align-items-start flex-column">
+                                    Customer
+                                </span>
+                            </div>
+                            <div class="col-lg-12">
+                                <!--begin::Nav-->
+                                @*<ul class="nav d-flex justify-content-between mb-3  mx-9">*@
+                                @(Html.Kendo().ComboBox()
+                                    .Name("Customers")
+                                    .Placeholder("Select Customer")
+                                    .DataTextField("cusName")
+                                    .DataValueField("cusID")
+                                    .HtmlAttributes(new { style = "width:100%;" })
+                                    .Filter(FilterType.Contains)
+                                     .HtmlAttributes(new { style = "width: 100%", title = "datepicker", @tabindex="2" , @class = "form-control" })
+                                    .DataSource(source => {
+                                        source.Read(read =>
+                                        {
+                                            read.Action("GetCustomer", "Order");
+                                        });
+                                    })
+                                    .Events(e =>
+                                    {
+                                        e.Change("CusChange");
+                                    })
+                                                  )
+                                <span id="cusError" style="color:red; display:none"> Please choose customer </span>
+
+                                @*</ul>*@
+                            </div>
+                        </div>
+
+
+
+                        <div class="col-lg-4">
+                            <div class="col-lg-12 pt-5">
+                                <!--begin::Title-->
+                                <span class="align-items-start flex-column">
                                     Route
                                 </span>
                             </div>
@@ -91,40 +128,7 @@
                         </div>
 
 
-                        <div class="col-lg-4">
-                            <div class="col-lg-12 pt-5">
-                                <!--begin::Title-->
-                                <span class="align-items-start flex-column">
-                                    Customer
-                                </span>
-                            </div>
-                            <div class="col-lg-12">
-                                <!--begin::Nav-->
-                                @*<ul class="nav d-flex justify-content-between mb-3  mx-9">*@
-                                @(Html.Kendo().ComboBox()
-                      .Name("Customers")
-                      .Placeholder("Select Customer")
-                      .DataTextField("cusName")
-                      .DataValueField("cusID")
-                      .HtmlAttributes(new { style = "width:100%;" })
-                      .Filter(FilterType.Contains)
-                       .HtmlAttributes(new { style = "width: 100%", title = "datepicker", @tabindex="2" , @class = "form-control" })
-                      .DataSource(source => {
-                          source.Read(read =>
-                          {
-                              read.Action("GetCustomer", "Order");
-                          });
-                      })
-                      .Events(e =>
-                      {
-                          e.Change("CusChange");
-                      })
-                                    )
-                                <span id="cusError" style="color:red; display:none"> Please choose customer </span>
 
-                                @*</ul>*@
-                            </div>
-                        </div>
 
 
                         <div class="col-lg-4">
@@ -135,24 +139,34 @@
                                 </span>
                             </div>
                             <div class="row col-lg-12 pt-2">
-                                <div class="col-6">
+                                <div class="col-4">
                                     <label class="form-check-image active">
                                         <div class="form-check form-check-custom form-check-solid">
-                                            <input class="form-check-input" type="radio" onclick="CusChange()" checked value="1" name="otype" />
+                                            <input class="form-check-input" type="radio" onclick="RouteChange()" checked value="1" name="otype" />
                                             <div class="form-check-label">
-                                                New Order
+                                                New
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="col-4" id="freeSampleContainer">
+                                    <label class="form-check-image active">
+                                        <div class="form-check form-check-custom form-check-solid">
+                                            <input class="form-check-input" type="radio" id="freeSample" onclick="RouteChange()" value="2" name="otype" />
+                                            <div class="form-check-label">
+                                                Free Sample
                                             </div>
                                         </div>
                                     </label>
                                 </div>
                                 <!--end::Col-->
                                 <!--begin::Col-->
-                                <div class="col-6">
+                                <div class="col-4">
                                     <label class="form-check-image active">
                                         <div class="form-check form-check-custom form-check-solid">
-                                            <input class="form-check-input" id="repeat" onclick="CusChange()" type="radio" value="2" name="otype" />
+                                            <input class="form-check-input" id="repeat" onclick="RouteChange()" type="radio" value="2" name="otype" />
                                             <div class="form-check-label">
-                                                Repeat Order
+                                                Repeat
                                             </div>
                                         </div>
                                     </label>
@@ -220,7 +234,7 @@
                       .AutoBind(false)
                       .CascadeFrom("Customers")
                 )
-                                        <span id="slotError" style="color:red; display:none"> Please choose slot</span>
+                                        
                                     </ul>
                                 </div>
 
@@ -273,15 +287,62 @@
 
                         <!--end::Body-->
                     </div>
+                    <div class=" col-lg-12 row" style="display: -webkit-box;">
+
+                    </div>
+                    <div class=" col-lg-12 row">
+                        <!--begin::Header-->
+                        <div class="col-lg-5">
+                            <div class="col-lg-12">
+                                <span class=" align-items-start flex-column">
+                                    LPO
+                                </span>
+                                <span id="isFreeSampleCustomer" hidden="hidden"></span>
+                                <span id="IsQuotationCustomer" hidden="hidden"></span>
+                                <span id="IsPriceChange" hidden="hidden"></span>
+                                <span id="IsPriceChangeApproval" hidden="hidden"></span>
+                                <div class="form-group" style="display: flex; align-items: center; margin-bottom: 10px;">
+                                    <input type="text" class="form-control" id="LPO" name="lpo" placeholder="Enter LPO" style="margin-right: 10px; height: 30px; ">
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="nav d-flex justify-content-between mb-3 ">
+                                <div class="form-group" id="LPOfile">
+                                    <div class="form-group">
+                                        @(Html.Kendo().Upload()
+    .Name("files")
+    .Async(a => a
+        .Save("Async_Save", "Order")
+        .Remove("Async_Remove", "Order")
+        .AutoUpload(true)
+    ).HtmlAttributes(new { @style="width:100%" })
+    .DropZone(null)
+    .Multiple(false)
+)
+                                        <label id="lblFile" style="color: red; font-size: small; margin-left: 10px;"></label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                      
+
+
+                        <!--<div class="col-lg-4">
+
+        <!--end::Body-->
+                    </div>
                 </div>
                 <!--end::Col-->
                 <!--begin::Col-->
                 <div class="col-xl-3">
                     <!--begin::Tables widget 14-->
-                    <div class="card card-flush h-md-100">
+                    <div class="card card-flush h-md-100 px-2">
 
 
-                        <div class="table-responsive" style="padding-left:7%; padding-right:5%; padding-top:2%">
+                        <div class="table-responsive" style="padding-left:7%; padding-right:5%; padding-top:8%">
                             <table class="table mb-0">
                                 <tbody>
                                     <tr>
@@ -335,7 +396,7 @@
                     <div class="card card-flush h-md-100">
 
 
-                        <div class="table-responsive" style="padding-left:7%; padding-right:5%; padding-top:2%">
+                        <div class="table-responsive" style="padding-left:7%; padding-right:5%; padding-top:8%">
                             <table class="table mb-0">
                                 <tbody>
                                     <tr>
@@ -444,7 +505,7 @@
                       })
                        .Enable(true)
                       .AutoBind(false)
-                      .CascadeFrom("Customers")
+                      .CascadeFrom("Route")
                 )
                                         <span id="itmError" style="color:red; display:none"> Please choose item </span>
 
@@ -482,28 +543,40 @@
                 )
                                         <span id="HuomError" style="color:red; display:none"> Please choose H.UOM </span>
                                     </th>
-                                    <th class="pb-0" style="text-align: center; vertical-align: middle;">
-                                        <span style="color:green" id="H_Offer_Price">0.00</span>  <del>
-                                            <span style="color:red" id="H_Std_Price"></span>
-                                        </del>
+                                    <th class="pb-0 col-lg-1" style="text-align: center; vertical-align: middle;">
+                                        @*<span style="color:green" id="H_Offer_Price">0.00</span>  <del>
+                                    <span style="color:red" id="H_Std_Price"></span>
+                                </del>*@
+
+                                        @(Html.Kendo().NumericTextBox<decimal>()
+                                           .Name("H_Offer_Price")
+                                           .Format("#")
+                                           .Placeholder("")
+                                           .Min(0)
+                                           .Decimals(2)
+                                           .HtmlAttributes(new { @tabindex = "7", @class = "form-control" })
+                                       )
+
+
+
                                     </th>
                                     <th class="pb-0 col-lg-1" style="text-align: end;">
 
                                         @(Html.Kendo().NumericTextBox<int>()
             .Name("HQty")
             .Format("#")
-            .Placeholder("Enter Qty")
+            .Placeholder("H.Qty")
             .Min(0)
             .Max(2000)
             .Events(e => e
              .Change("CalcTotPrice")
              .Spin("CalcTotPrice") )
-            .HtmlAttributes(new {  title = "numeric", @tabindex = "7", @class = "form-control", @AutoComplete = "off" })
+            .HtmlAttributes(new {  title = "numeric", @tabindex = "8", @class = "form-control", @AutoComplete = "off", style = "width: 120%" })
       )
                                         <span id="HQtyError" style="color:red; display:none"> Please enter H.Qty </span>
                                     </th>
 
-                                    <th class="pb-0 col-lg-1" style="text-align: end;">
+                                    <th class="pb-0 col-lg-1 px-10" style="text-align: end;">
                                         @(Html.Kendo().MultiColumnComboBox()
                       .Name("LUOM")
                       .Placeholder("Select L.UOM")
@@ -533,27 +606,38 @@
                 )
                                     </th>
                                     <th class="pb-0 col-lg-1" style="text-align: center; vertical-align: middle;">
-                                        <span style="color:green" id="L_Offer_Price">0.00</span>
-                                        <del><span style="color:red" id="L_Std_Price"></span> </del>
+                                        @*<span style="color:green" id="L_Offer_Price">0.00</span>
+                                <del><span style="color:red" id="L_Std_Price"></span> </del>*@
+
+                                        @(Html.Kendo().NumericTextBox<decimal>()
+                                            .Name("L_Offer_Price")
+                                            .Format("#")
+                                            .Placeholder("")
+                                            .Min(0)
+                                            .Decimals(2)
+                                            .HtmlAttributes(new { @tabindex = "9", @class = "form-control" })
+                                        )
+
+
                                     </th>
                                     <th class="pb-0 col-lg-1" style="text-align: end;">
 
                                         @(Html.Kendo().NumericTextBox<int>()
                                          .Name("LQty")
                                          .Format("#")
-                                         .Placeholder("Enter Qty")
+                                         .Placeholder("L.Qty")
                                          .Min(0)
                                          .Max(2000)
                                            .Events(e => e
              .Change("CalcTotPrice")
              .Spin("CalcTotPrice"))
-                                          .HtmlAttributes(new {  title = "numeric" ,  @tabindex = "9", @class = "form-control", @AutoComplete = "off" })
+                                          .HtmlAttributes(new {  title = "numeric" ,  @tabindex = "10", @class = "form-control", @AutoComplete = "off" ,style = "width: 120%" })
                                         )
 
                                     </th>
-                                    <th class="pb-0" style="text-align: center; vertical-align:middle; "> <span style="color:green" id="TotalPrice">0.00</span></th>
+                                    <th class="pb-0 px-10" style="text-align: center; vertical-align:middle; "> <span style="color:green" id="TotalPrice">0.00</span></th>
                                     <th class="pb-0 col-lg-1" style="text-align: end;">
-                                        <a href="#" onclick="AddItem()" class=" btn-outline-default " tabindex="10">Add Item</a>
+                                        <a href="#" onclick="AddItem()" class=" btn-outline-default " tabindex="11">Add Item</a>
                                         <img id="loaderAdd" style="display: none;" class="text-center" src="../Content/media/icons/loader.gif" height="38" />
                                     </th>
                                 </tr>
@@ -561,6 +645,9 @@
                         </table>
                     </div>
                 </div>
+                <span id="H_Price" hidden="hidden"></span>
+                <span id="L_Price" hidden="hidden"></span>
+                <span id="pch_ID" hidden="hidden"></span>
             </div>
 
             <div class="row g-5 g-xl-10 mb-5 mb-xl-10" style="margin-right:0px" id="lstOrderListing">
@@ -592,6 +679,37 @@
     </div>
     <!--end::Content-->
 </div>
+
+
+<div class="modal fade" tabindex="-1" id="modal_ord_PriceChange_popup" data-backdrop="false" data-keyboard="false" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content position-absolute">
+            <div class="modal-header">
+                <h5 class="modal-title">Price Change Approval</h5>
+
+                <!--begin::Close-->
+                <div class="btn btn-icon btn-sm btn-active-light-primary ms-2" data-bs-dismiss="modal" aria-label="Close">
+                    <span class="svg-icon svg-icon-2x"></span>
+                </div>
+                <!--end::Close-->
+            </div>
+
+            <div class="modal-body" style="padding-bottom:0px">
+                <h3>Please Approve the Price Change Request of this item then click Proceed</h3>
+
+            </div>
+
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" onclick="ConfirmPriceChange()" class="btn btn-primary">Proceed</button>
+                <img id="ConfirmLoader" style="display: none;" class="text-center" src="../Content/media/icons/loader.gif" height="38" />
+            </div>
+        </div>
+
+    </div>
+</div>
+
 @{
     Html.RenderPartial("ProceedBack");
     Html.RenderPartial("ProceedOrder");
@@ -623,6 +741,8 @@
                       $("#HUOM").data("kendoMultiColumnComboBox").input.val("");
                       $("#HQty").data("kendoNumericTextBox").value("")
                       $("#LQty").data("kendoNumericTextBox").value("");
+                      $("#L_Offer_Price").data("kendoMultiColumnComboBox").input.val("");
+                      $("#H_Offer_Price").data("kendoMultiColumnComboBox").input.val("");
 
                       $("#Items").val("");
                       $("#HUOM").val("");
@@ -673,7 +793,7 @@
 
         if (totQty == elgQty) {
 
-             $.ajax({
+            $.ajax({
                 type: "POST",
                 url: '@Url.Action("FindNextPromo", "Order")',
                 contentType: "application/json; charset=utf-8",
@@ -725,6 +845,19 @@
         expDelDate = $("#dspDate").val();
         cusID = $("#Customers").val();
 
+        var isChecked = $('#freeSample').is(':checked');
+        if (!isChecked) {
+            isFreeSampleCustomer = "N"
+        }
+        else {
+            isFreeSampleCustomer = "Y"
+        }
+        var IsQuotationCustomer = document.getElementById("IsQuotationCustomer").innerHTML;
+
+        var AvCreditLimit = parseFloat(document.getElementById("AvCreditLimit").innerText);
+        var Summ_GrandTotal = parseFloat(document.getElementById("Summ_GrandTotal").innerText);
+        var PayType = document.getElementById("PayType").innerText;
+
 
 
 
@@ -733,8 +866,10 @@
         } else if (expDelDate == "") {
 
             $('#dateError').show();
-        } else if (DelSlot == "") {
-            $('#slotError').show();
+            //} else if (DelSlot == "") {
+            //    $('#slotError').show();
+        } else if ((PayType == "Credit") && (Summ_GrandTotal > AvCreditLimit)) {
+            $('#modal_ord_restricted_popup').modal('show');
         } else {
 
                 $.ajax({
@@ -747,9 +882,23 @@
                     },
               success: function (data) {
                   if (data.res == "1") {
-                      if (data.PrmCount == 0) {
+
+
+                      if ((data.PrmCount == 0) || (isFreeSampleCustomer == "Y"))
+                      {
+
+
                           //IN PROCEEDORDER VIEW
                           $('#modal_ord_proceed_popup').modal('show');
+
+
+                          if (IsQuotationCustomer === "Y") {
+                              $('#quotaion').show();
+                          } else {
+                              $('#quotaion').hide();
+                          }
+
+
                       } else {
                           $('#btnProceed').hide();
                           $('#lstOrderAdding').hide('slow');
@@ -768,64 +917,165 @@
 
 
     function ShowSummary() {
-         $.ajax({
+
+        var isChecked = $('#freeSample').is(':checked');
+        if (!isChecked) {
+            isFreeSampleCustomer = "N"
+        }
+        else {
+            isFreeSampleCustomer = "Y"
+        }
+
+            $.ajax({
                 type: "GET",
                 url: '@Url.Action("getSummary", "Order")',
                 contentType: "application/json; charset=utf-8",
+                data: {
+                    "isFreeSampleCustomer": isFreeSampleCustomer
+                },
                 dataType: "json",
-              success: function (data) {
+                success: function (data) {
 
-                  document.getElementById("Summ_Total").innerHTML = data.Total;
-                  document.getElementById("Summ_Discount").innerHTML = data.Discount;
-                  document.getElementById("Summ_SubTotal").innerHTML = data.SubTotal;
-                  document.getElementById("Summ_VAT").innerHTML = data.VAT;
-                  document.getElementById("Summ_GrandTotal").innerHTML = data.GrandTotal;
+                    document.getElementById("Summ_Total").innerHTML = data.Total;
+                    document.getElementById("Summ_Discount").innerHTML = data.Discount;
+                    document.getElementById("Summ_SubTotal").innerHTML = data.SubTotal;
+                    document.getElementById("Summ_VAT").innerHTML = data.VAT;
+                    document.getElementById("Summ_GrandTotal").innerHTML = data.GrandTotal;
                 }
+
             });
+
     }
 
     function CusChange() {
         $('#loaderAll').show('slow');
-        setTimeout(function () {
 
-            var isChecked = $('#repeat').is(':checked');
-            var cmbBox = $("#PrevOrder").data('kendoMultiColumnComboBox');
-            if (!isChecked) {
-                cmbBox.enable(false);
-            } else {
-                cmbBox.enable(true);
+
+
+        var customerComboBox = $("#Route").data("kendoComboBox");
+        customerComboBox.value('');
+        customerComboBox.text('');
+        customerComboBox.dataSource.data([]);
+
+
+        var cusID = $("#Customers").data("kendoComboBox").value();
+
+        $.ajax({
+            url: '/Order/GetRoute',
+            type: 'GET',
+            data: { cusID: cusID },
+            success: function (data) {
+                var customerComboBox = $("#Route").data("kendoComboBox");
+                customerComboBox.dataSource.data([]);
+                customerComboBox.dataSource.data(data);
+
+                if (data.length > 0) {
+                    customerComboBox.select(0);  
+
+                }
+                var routeId = customerComboBox.value();
+
+                if (routeId) {
+                     setTimeout(function () {
+
+                         var isChecked = $('#repeat').is(':checked');
+                         var cmbBox = $("#PrevOrder").data('kendoMultiColumnComboBox');
+                         if (!isChecked) {
+                             cmbBox.enable(false);
+                         } else {
+                             cmbBox.enable(true);
+                         }
+                     }, 2000);
+
+                     
+                     var customerComboBox = $("#Customers").data("kendoComboBox");
+
+
+
+
+                       cusID = $("#Customers").val();
+                       rotID = $("#Route").val();
+                         $.ajax({
+                               type: "GET",
+                               url: '@Url.Action("getCusCrTerms", "Order")',
+                               contentType: "application/json; charset=utf-8",
+                               data: {
+                                   "cusID": cusID,
+                                   "rotID": rotID
+                               },
+                            dataType: "json",
+                             success: function (data) {
+                                 $('#PayType').text(data.cusType);
+                                 $('#CreditDays').text(data.crDays);
+                                 $('#TotCredLimit').text(data.TotalCr);
+                                 $('#UsedCredLimit').text(data.UsedCr);
+                                 $('#AvCreditLimit').text(data.AvlCr);
+                                 document.getElementById("isFreeSampleCustomer").innerHTML = data.isFreeSampleCustomer;
+                                 document.getElementById("IsQuotationCustomer").innerHTML = data.IsQuotationCustomer;
+                                 document.getElementById("IsPriceChange").innerHTML = data.IsPriceChange;
+                                 document.getElementById("IsPriceChangeApproval").innerHTML = data.IsPriceChangeApproval;
+
+                            }
+                         });
+
+                       var isFreeSampleCustomer = document.getElementById("isFreeSampleCustomer").innerHTML;
+                       if (isFreeSampleCustomer == "Y") {
+                           $('#freeSampleContainer').show();
+                       }
+                       var IsPriceChangeApproval = document.getElementById("IsPriceChangeApproval").innerHTML;
+                       var IsPriceChange = document.getElementById("IsPriceChange").innerHTML;
+
+
+                     $('#listPartial').load('/Order/ShowList');
+
+                     $('#PayType').text("");
+                     $('#CreditDays').text("");
+                     $('#TotCredLimit').text("");
+                     $('#UsedCredLimit').text("");
+                     $('#AvCreditLimit').text("");
+
+
+                     document.getElementById("Summ_Total").innerHTML = "";
+                     document.getElementById("Summ_Discount").innerHTML = "";
+                     document.getElementById("Summ_SubTotal").innerHTML = "";
+                     document.getElementById("Summ_VAT").innerHTML = "";
+                     document.getElementById("Summ_GrandTotal").innerHTML = "";
+
+
+
+
+
+                     if ((IsPriceChange == "Y") || (IsPriceChangeApproval == "Y")) {
+                         $("#H_Offer_Price").data("kendoNumericTextBox").enable(true);
+                         $("#L_Offer_Price").data("kendoNumericTextBox").enable(true);
+                     }
+                     else {
+                         $("#H_Offer_Price").data("kendoNumericTextBox").enable(false);
+                         $("#L_Offer_Price").data("kendoNumericTextBox").enable(false);
+                     }
+
+                     $('#loaderAll').hide('slow');
+
+                }
+
+            },
+            error: function (xhr, status, error) {
+                console.log("Error: " + error);
             }
-        }, 2000);
+        });
 
 
 
-        cusID = $("#Customers").val();
-        rotID = $("#Route").val();
-          $.ajax({
-                type: "GET",
-                url: '@Url.Action("getCusCrTerms", "Order")',
-                contentType: "application/json; charset=utf-8",
-                data: {
-                    "cusID": cusID,
-                    "rotID": rotID
-                },
-             dataType: "json",
-              success: function (data) {
-                  $('#PayType').text(data.cusType);
-                  $('#CreditDays').text(data.crDays);
-                  $('#TotCredLimit').text(data.TotalCr);
-                  $('#UsedCredLimit').text(data.UsedCr);
-                  $('#AvCreditLimit').text(data.AvlCr);
-             }
-          });
+
+
 
         $('#listPartial').load('/Order/ShowList');
+
         document.getElementById("Summ_Total").innerHTML = "";
         document.getElementById("Summ_Discount").innerHTML = "";
         document.getElementById("Summ_SubTotal").innerHTML = "";
         document.getElementById("Summ_VAT").innerHTML = "";
         document.getElementById("Summ_GrandTotal").innerHTML = "";
-
 
 
         $('#loaderAll').hide('slow');
@@ -864,71 +1114,171 @@
             $('#loaderAdd').hide('slow')
         }
         else {
+
+            var isChecked = $('#freeSample').is(':checked');
+            if (!isChecked) {
+                isFreeSampleCustomer = "N"
+            }
+            else {
+                isFreeSampleCustomer = "Y"
+            }
+
+            var numericTextBox = $("#H_Offer_Price").data("kendoNumericTextBox");
+
+
             $('#cusError').hide('slow');
             $('#itmError').hide('slow');
             $('#HuomError').hide('slow');
             $('#HQtyError').hide('slow');
-               $.ajax({
-                type: "GET",
-                url: '@Url.Action("AddItem", "Order")',
-                contentType: "application/json; charset=utf-8",
-                data: {
-                    "itmID": itmID,
-                    "cusID": cusID,
-                    "rotID": rotID,
-                    "H_uom_ID": HuomID,
-                    "H_Qty": h_Qty,
-                    "L_uom_ID": LuomID,
-                    "L_Qty": l_Qty,
-                    
-                },
-             dataType: "json",
-             success: function (data) {
-                 if (data.res == "0") {
 
-                     $('#listPartial').load('/Order/ShowList');
+            var H_price = $("#H_Offer_Price").data("kendoNumericTextBox").value();
+            var L_price = $("#L_Offer_Price").data("kendoNumericTextBox").value();
 
-                     $("#Items").data("kendoMultiColumnComboBox").input.val("");
-                     $("#LUOM").data("kendoMultiColumnComboBox").input.val("");
-                     $("#HUOM").data("kendoMultiColumnComboBox").input.val("");
-                     $("#HQty").data("kendoNumericTextBox").value("")
-                     $("#LQty").data("kendoNumericTextBox").value("");
+            var H_priceTemp = document.getElementById("H_Price").innerHTML;
+            var L_priceTemp = document.getElementById("L_Price").innerHTML;
 
-                     $("#Items").val("");
-                     $("#HUOM").val("");
-                     $("#LUOM").val("");
+            var IsPriceChangeApproval = document.getElementById("IsPriceChangeApproval").innerHTML;
+            if (numericTextBox.enable() === true) {
 
-                     var ddlItems = $("#Items").data("kendoMultiColumnComboBox");
-                     ddlItems.dataSource.read();
-                     ddlItems.focus();
+                if (IsPriceChangeApproval == "Y") {
+                     if ((H_price != H_priceTemp) || (L_price != L_priceTemp))
+                     {
 
-                     ShowSummary();
+                     $.ajax({
+                         type: "GET",
+                         url: '@Url.Action("InsPriceChange", "Order")',
+                         contentType: "application/json; charset=utf-8",
+                         data: {
+                             "itmID": itmID,
+                             "cusID": cusID,
+                             "rotID": rotID,
+                             "H_uom_ID": HuomID,
+                             "H_Qty": h_Qty,
+                             "L_uom_ID": LuomID,
+                             "L_Qty": l_Qty,
+                             "H_priceChanged": H_price,
+                             "L_priceChanged": L_price,
+                             "H_Price": H_priceTemp,
+                             "L_Price": L_priceTemp
 
-
-
-                     $('#loaderAdd').hide('hide');
+                         },
+                         dataType: "json",
+                         success: function (data) {
+                             if (data.res == "0") {
 
 
+                                 document.getElementById("pch_ID").innerHTML = data[0].pchID;
 
 
-                 } else {
-                     toastr.error(data.err);
-                     $('#loaderAdd').hide('hide');
-                 }
-             }
-               });
+                             } else {
+                                 toastr.error(data.err);
+                                 $('#loaderAdd').hide('hide');
+                             }
+                         }
+                     });
+                     $('#modal_ord_PriceChange_popup').modal('show');
+                     }
+                     else
+                     {
+                         AddItemFinal()
+                     }
+
+                }
+
+            }
+
+            else
+            {
+
+                AddItemFinal()
+
+            }
+
         }
 
 
 
     }
 
+    function AddItemFinal() {
 
-    function CalcTotPrice() {
-        var H_price = document.getElementById("H_Offer_Price").innerHTML;
-        var L_price = document.getElementById("L_Offer_Price").innerHTML;
+        cusID = $("#Customers").val();
+        rotID = $("#Route").val();
+        itmID = $("#Items").val();
+        HuomID = $("#HUOM").val();
+        LuomID = $("#LUOM").val();
+
         var h_Qty = $("#HQty").data("kendoNumericTextBox").value();
         var l_Qty = $("#LQty").data("kendoNumericTextBox").value();
+
+            $.ajax({
+                 type: "GET",
+                 url: '@Url.Action("AddItem", "Order")',
+                 contentType: "application/json; charset=utf-8",
+                 data: {
+                     "itmID": itmID,
+                     "cusID": cusID,
+                     "rotID": rotID,
+                     "H_uom_ID": HuomID,
+                     "H_Qty": h_Qty,
+                     "L_uom_ID": LuomID,
+                     "L_Qty": l_Qty,
+                     "isFreeSampleCustomer": isFreeSampleCustomer
+                 },
+                 dataType: "json",
+                 success: function (data) {
+                     if (data.res == "0") {
+
+                         $('#listPartial').load('/Order/ShowList');
+
+                         $("#Items").data("kendoMultiColumnComboBox").input.val("");
+                         $("#LUOM").data("kendoMultiColumnComboBox").input.val("");
+                         $("#HUOM").data("kendoMultiColumnComboBox").input.val("");
+                         $("#HQty").data("kendoNumericTextBox").value("")
+                         $("#LQty").data("kendoNumericTextBox").value("");
+
+
+
+                         $("#L_Offer_Price").data("kendoNumericTextBox").value("");
+                         $("#H_Offer_Price").data("kendoNumericTextBox").value("");
+
+                         $("#Items").val("");
+                         $("#HUOM").val("");
+                         $("#LUOM").val("");
+
+                         var ddlItems = $("#Items").data("kendoMultiColumnComboBox");
+                         ddlItems.dataSource.read();
+                         ddlItems.focus();
+
+                         ShowSummary();
+
+
+
+                         $('#loaderAdd').hide('hide');
+
+
+
+
+                     } else {
+                         toastr.error(data.err);
+                         $('#loaderAdd').hide('hide');
+                     }
+                 }
+            });
+
+    }
+
+
+    function CalcTotPrice() {
+        //var H_price = document.getElementById("H_Offer_Price").innerHTML;
+        //var L_price = document.getElementById("L_Offer_Price").innerHTML;
+
+        var H_price = $("#H_Offer_Price").data("kendoNumericTextBox").value();
+        var L_price = $("#L_Offer_Price").data("kendoNumericTextBox").value() == null ? "0" : $("#L_Offer_Price").data("kendoNumericTextBox").value();
+
+
+        var h_Qty = $("#HQty").data("kendoNumericTextBox").value();
+        var l_Qty = $("#LQty").data("kendoNumericTextBox").value() == null ? "0" : $("#LQty").data("kendoNumericTextBox").value();
          $.ajax({
                 type: "GET",
                 url: '@Url.Action("CalcItemTotal", "Order")',
@@ -963,16 +1313,20 @@
                 },
                 dataType: "json",
                 success: function (data) {
+                    $("#H_Offer_Price").data("kendoNumericTextBox").value(data[0].OfferPrice);
+                    document.getElementById("H_Price").innerHTML = data[0].OfferPrice;
 
-                    document.getElementById("H_Offer_Price").innerHTML = data[0].OfferPrice;
-                    document.getElementById("H_Std_Price").innerHTML = data[0].StandardPrice;
+                    $("#H_Offer_Price").data("kendoNumericTextBox").enable(false);
+                    $("#L_Offer_Price").data("kendoNumericTextBox").enable(false);
                 }
             });
         } else {
-            document.getElementById("H_Offer_Price").innerHTML = "0.00";
-            document.getElementById("H_Std_Price").innerHTML = "";
-            document.getElementById("L_Offer_Price").innerHTML = "0.00";
-            document.getElementById("L_Std_Price").innerHTML = "";
+            $("#H_Offer_Price").data("kendoNumericTextBox").value("0.00");
+           // document.getElementById("H_Offer_Price").innerHTML = "0.00";
+            // document.getElementById("H_Std_Price").innerHTML = "";
+            $("#L_Offer_Price").data("kendoNumericTextBox").value("0.00");
+            //document.getElementById("L_Offer_Price").innerHTML = "0.00";
+            //document.getElementById("L_Std_Price").innerHTML = "";
             $("#LQty").data("kendoNumericTextBox").value("");
             $("#HQty").data("kendoNumericTextBox").value("");
         }
@@ -997,14 +1351,12 @@
                 },
                 dataType: "json",
               success: function (data) {
-
-                  document.getElementById("L_Offer_Price").innerHTML = data[0].OfferPrice;
-                  document.getElementById("L_Std_Price").innerHTML = data[0].StandardPrice;
+                  $("#L_Offer_Price").data("kendoNumericTextBox").value(data[0].OfferPrice);
+                  document.getElementById("L_Price").innerHTML = data[0].OfferPrice;
                 }
             });
         } else {
-            document.getElementById("L_Offer_Price").innerHTML = "0.00";
-            document.getElementById("L_Std_Price").innerHTML = "";
+            $("#L_Offer_Price").data("kendoNumericTextBox").value("0.00");
             $("#LQty").data("kendoNumericTextBox").value("");
         }
         CalcTotPrice();
@@ -1048,9 +1400,11 @@
 
 
     $(document).ready(function () {
-        var cmbBox = $("#Route").data('kendoComboBox');
+        var cmbBox = $("#Customers").data('kendoComboBox');
         cmbBox.focus();
-
+        $('#freeSampleContainer').hide();
+        $("#H_Offer_Price").data("kendoNumericTextBox").enable(false);
+        $("#L_Offer_Price").data("kendoNumericTextBox").enable(false);
     });
 
     function Cusfilter() {
@@ -1075,36 +1429,133 @@
             itemName: $("#Items").data("kendoMultiColumnComboBox").input.val()
         };
     }
+    function ConfirmPriceChange() {
+
+        var pchID = document.getElementById("pch_ID").innerHTML;
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("SelProductWiseStatus", "Order")',
+            contentType: "application/json; charset=utf-8",
+            data: {
+                pchID: pchID
+            },
+            dataType: "json",
+            success: function (data) {
+
+              var status = data[0].OfferPrice;
+              if (status == "A") {
+
+              }
+              else {
+
+              }
+          }
+        });
+
+        $.ajax({
+            url: '/Order/SelProductWiseStatus',
+            type: 'GET',
+            data: { pchID: pchID },
+            success: function (data) {
+                var customerComboBox = $("#Customers").data("kendoComboBox");
+
+
+                customerComboBox.dataSource.data([]);
+
+
+                customerComboBox.dataSource.data(data);
+
+
+            },
+            error: function (xhr, status, error) {
+                console.log("Error: " + error);
+            }
+        });
+
+    }
 
     function RouteChange() {
-        var routeId = $("#Route").data("kendoComboBox").value(); // Get selected Route ID
 
-        if (routeId) {
-            // Make an AJAX call to fetch customers based on selected route
+        setTimeout(function () {
+
+            var isChecked = $('#repeat').is(':checked');
+            var cmbBox = $("#PrevOrder").data('kendoMultiColumnComboBox');
+            if (!isChecked) {
+                cmbBox.enable(false);
+            } else {
+                cmbBox.enable(true);
+            }
+        }, 2000);
+
+        var routeId = $("#Route").data("kendoComboBox").value();
+        var customerComboBox = $("#Customers").data("kendoComboBox");
+
+
+
+
+          cusID = $("#Customers").val();
+          rotID = $("#Route").val();
             $.ajax({
-                url: '/Order/GetCustomer', // Your action to get customers based on route
-                type: 'GET',
-                data: { routeId: routeId }, // Send selected routeId as parameter
+                  type: "GET",
+                  url: '@Url.Action("getCusCrTerms", "Order")',
+                  contentType: "application/json; charset=utf-8",
+                  data: {
+                      "cusID": cusID,
+                      "rotID": rotID
+                  },
+               dataType: "json",
                 success: function (data) {
-                    var customerComboBox = $("#Customers").data("kendoComboBox");
+                    $('#PayType').text(data.cusType);
+                    $('#CreditDays').text(data.crDays);
+                    $('#TotCredLimit').text(data.TotalCr);
+                    $('#UsedCredLimit').text(data.UsedCr);
+                    $('#AvCreditLimit').text(data.AvlCr);
+                    document.getElementById("isFreeSampleCustomer").innerHTML = data.isFreeSampleCustomer;
+                    document.getElementById("IsQuotationCustomer").innerHTML = data.IsQuotationCustomer;
+                    document.getElementById("IsPriceChange").innerHTML = data.IsPriceChange;
+                    document.getElementById("IsPriceChangeApproval").innerHTML = data.IsPriceChangeApproval;
 
-                    // Clear the current customer dropdown items
-                    customerComboBox.dataSource.data([]);
-
-                    // Populate with new data
-                    customerComboBox.dataSource.data(data);
-
-                    
-                },
-                error: function (xhr, status, error) {
-                    console.log("Error: " + error);
-                }
+               }
             });
-        } else {
-            // If no route is selected, clear the Customer dropdown
-            var customerComboBox = $("#Customers").data("kendoComboBox");
-            customerComboBox.dataSource.data([]);
+
+          var isFreeSampleCustomer = document.getElementById("isFreeSampleCustomer").innerHTML;
+          if (isFreeSampleCustomer == "Y") {
+              $('#freeSampleContainer').show();
+          }
+          var IsPriceChangeApproval = document.getElementById("IsPriceChangeApproval").innerHTML;
+          var IsPriceChange = document.getElementById("IsPriceChange").innerHTML;
+
+
+        $('#listPartial').load('/Order/ShowList');
+
+        $('#PayType').text("");
+        $('#CreditDays').text("");
+        $('#TotCredLimit').text("");
+        $('#UsedCredLimit').text("");
+        $('#AvCreditLimit').text("");
+
+
+        document.getElementById("Summ_Total").innerHTML = "";
+        document.getElementById("Summ_Discount").innerHTML = "";
+        document.getElementById("Summ_SubTotal").innerHTML = "";
+        document.getElementById("Summ_VAT").innerHTML = "";
+        document.getElementById("Summ_GrandTotal").innerHTML = "";
+
+
+
+
+
+        if ((IsPriceChange == "Y") || (IsPriceChangeApproval == "Y")) {
+            $("#H_Offer_Price").data("kendoNumericTextBox").enable(true);
+            $("#L_Offer_Price").data("kendoNumericTextBox").enable(true);
         }
+        else {
+            $("#H_Offer_Price").data("kendoNumericTextBox").enable(false);
+            $("#L_Offer_Price").data("kendoNumericTextBox").enable(false);
+        }
+
+        $('#loaderAll').hide('slow');
+
     }
 
 
